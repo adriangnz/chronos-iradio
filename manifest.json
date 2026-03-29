@@ -1,0 +1,27 @@
+{
+    "name": "Chronos iRadio",
+    "short_name": "Chronos iRadio",
+    "description": "Radio online en vivo desde Venezuela",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0a0f",
+    "theme_color": "#0a0a0f",
+    "lang": "es",
+    "icons": [
+        {
+            "src": "https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-192x192.jpg",
+            "sizes": "192x192",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-180x180.jpg",
+            "sizes": "180x180",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-32x32.jpg",
+            "sizes": "32x32",
+            "type": "image/jpeg"
+        }
+    ]
+}

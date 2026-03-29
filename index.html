@@ -3,13 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chronos iRadio</title>
-    <meta name="description" content="Chronos iRadio - Tu radio online desde Venezuela. Escucha en vivo la mejor programacion radial.">
+    <title>Chronos iRadio - Radio Online en Vivo</title>
+    <meta name="description" content="Chronos iRadio - Los clasicos de la musica de todos los tiempos. Radio online desde Venezuela dedicada a revivir la herencia musical de los ultimos 50 anos. Rock, pop, soul, jazz y musica latina.">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Chronos iRadio">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="canonical" href="https://chronosiradio.online/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Chronos iRadio - Radio Online en Vivo">
+    <meta property="og:description" content="Los clasicos de la musica de todos los tiempos. Radio online desde Venezuela con rock, pop, soul, jazz y musica latina de los ultimos 50 anos.">
+    <meta property="og:url" content="https://chronosiradio.online/">
+    <meta property="og:image" content="https://chronosiradio.online/wp-content/uploads/2026/01/banner-chronos.jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Chronos iRadio">
+    <meta property="og:locale" content="es_VE">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Chronos iRadio - Radio Online en Vivo">
+    <meta name="twitter:description" content="Los clasicos de la musica de todos los tiempos. Radio online desde Venezuela con rock, pop, soul, jazz y musica latina de los ultimos 50 anos.">
+    <meta name="twitter:image" content="https://chronosiradio.online/wp-content/uploads/2026/01/banner-chronos.jpeg">
+    <meta name="twitter:site" content="@chronos_iradio">
+
+    <!-- Favicon & Manifest -->
     <link rel="icon" href="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-32x32.jpg" sizes="32x32">
+    <link rel="icon" href="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-192x192.jpg" sizes="192x192">
     <link rel="apple-touch-icon" href="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-180x180.jpg">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Performance hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://chronosiradio.online">
+    <link rel="dns-prefetch" href="https://onlineradiobox.com">
+    <link rel="dns-prefetch" href="https://cdn.onlineradiobox.com">
+    <link rel="dns-prefetch" href="https://ecdn.onlineradiobox.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "RadioStation",
+        "name": "Chronos iRadio",
+        "url": "https://chronosiradio.online",
+        "logo": "https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-192x192.jpg",
+        "image": "https://chronosiradio.online/wp-content/uploads/2026/01/banner-chronos.jpeg",
+        "description": "Chronos iRadio es una estacion de radio dedicada a revivir y celebrar la rica herencia musical de los ultimos cincuenta anos. Desde los vibrantes ritmos del rock de los 70, pasando por las melodias del pop y el soul, hasta los inolvidables acordes del jazz y la musica latina.",
+        "genre": ["Rock", "Pop", "Soul", "Jazz", "Latin"],
+        "broadcastFrequency": "Online",
+        "broadcastTimezone": "America/Caracas",
+        "areaServed": {
+            "@type": "Country",
+            "name": "Venezuela"
+        },
+        "sameAs": [
+            "https://www.instagram.com/chronos_iradio",
+            "https://whatsapp.com/channel/0029Vb71Xvi05MUjSz673L1W",
+            "http://t.me/Km_rodriguez"
+        ],
+        "founder": {
+            "@type": "Person",
+            "name": "Km Rodriguez",
+            "jobTitle": "Creador y Director"
+        },
+        "employee": [
+            {
+                "@type": "Person",
+                "name": "Eryx Rodriguez",
+                "jobTitle": "Produccion y Locutor"
+            },
+            {
+                "@type": "Person",
+                "name": "Enrique Gonzalez",
+                "jobTitle": "Voz e Imagen"
+            },
+            {
+                "@type": "Person",
+                "name": "Franmary Fernandez",
+                "jobTitle": "Locutora"
+            },
+            {
+                "@type": "Person",
+                "name": "Victor Grinfelds",
+                "jobTitle": "Ingeniero"
+            }
+        ]
+    }
+    </script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -575,6 +659,10 @@
         }
 
         /* ===== SCROLL ANIMATIONS ===== */
+        /* ===== SKIP LINK ===== */
+        .skip-link { position: absolute; top: -100px; left: 16px; padding: 12px 24px; background: var(--accent-blue); color: #fff; border-radius: 0 0 8px 8px; font-weight: 600; z-index: 999; transition: top 0.2s; }
+        .skip-link:focus { top: 0; }
+
         .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
         .fade-up.visible { opacity: 1; transform: translateY(0); }
 
@@ -586,9 +674,12 @@
 </head>
 <body>
 
-    <div class="bg-glow"></div>
+    <a href="#main-content" class="skip-link">Saltar al contenido</a>
 
-    <!-- Navbar -->
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <!-- Header -->
+    <header>
     <nav class="navbar" id="navbar">
         <div class="container">
             <a href="#" class="logo">
@@ -605,14 +696,15 @@
                 <span class="live-dot"></span>
                 EN VIVO
             </a>
-            <button class="menu-toggle" onclick="toggleMobileNav()" aria-label="Menu">
+            <button class="menu-toggle" onclick="toggleMobileNav()" aria-label="Abrir menu de navegacion" aria-expanded="false" id="menuToggle">
                 <span></span><span></span><span></span>
             </button>
         </div>
     </nav>
+    </header>
 
     <!-- Mobile Nav -->
-    <div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menu de navegacion">
         <button class="mobile-nav-close" onclick="toggleMobileNav()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -622,6 +714,8 @@
         <a href="#contacto" onclick="toggleMobileNav()">Contacto</a>
     </div>
 
+    <main id="main-content">
+
     <!-- Hero -->
     <section class="hero" id="inicio">
         <div class="hero-bg">
@@ -630,7 +724,7 @@
         <div class="hero-content">
             <img class="hero-logo" src="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-192x192.jpg" alt="Chronos iRadio Logo">
             <h1><span>Chronos iRadio</span></h1>
-            <p>Tu radio online desde Venezuela. La mejor programacion, musica y contenido radial al alcance de un clic.</p>
+            <p>Los clasicos de la musica de todos los tiempos. Rock, pop, soul, jazz y musica latina de los ultimos 50 anos, desde Venezuela para el mundo.</p>
             <div class="hero-actions">
                 <a href="#playerBar" class="btn btn-primary">
                     <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -653,7 +747,7 @@
                     Programacion
                 </span>
                 <h2>Nuestros Programas</h2>
-                <p>Contenido variado para todos los gustos. Musica, tecnologia, cultura y mucho mas.</p>
+                <p>Cada dia, un viaje musical a traves de las decadas. Grandes exitos, artistas iconicos y la historia detras de las canciones.</p>
             </div>
 
             <div class="schedule-list">
@@ -729,11 +823,11 @@
                     Equipo
                 </span>
                 <h2>Quienes Somos</h2>
-                <p>Conoce a las personas detras de Chronos iRadio. Haz clic para saber mas.</p>
+                <p>Apasionados de la musica que conocen a fondo el impacto de cada cancion en la cultura popular. Haz clic para saber mas.</p>
             </div>
 
             <div class="team-grid">
-                <div class="team-card fade-up stagger-1" onclick="openModal(0)">
+                <div class="team-card fade-up stagger-1" onclick="openModal(0)" onkeydown="if(event.key==='Enter')openModal(0)" role="button" tabindex="0" aria-label="Ver perfil de Km Rodriguez">
                     <img class="team-card-img" src="https://chronosiradio.online/wp-content/uploads/2025/09/Imagen-de-WhatsApp-2025-09-25-a-las-14.11.57_bd4a09af-300x400.jpg" alt="Km Rodriguez" loading="lazy">
                     <div class="team-card-overlay"></div>
                     <div class="team-card-label">
@@ -746,7 +840,7 @@
                     <div class="team-card-border"></div>
                 </div>
 
-                <div class="team-card fade-up stagger-2" onclick="openModal(1)">
+                <div class="team-card fade-up stagger-2" onclick="openModal(1)" onkeydown="if(event.key==='Enter')openModal(1)" role="button" tabindex="0" aria-label="Ver perfil de Eryx Rodriguez">
                     <img class="team-card-img" src="https://chronosiradio.online/wp-content/uploads/2025/09/Imagen-de-WhatsApp-2025-09-25-a-las-14.13.22_6d59c73b-300x400.jpg" alt="Eryx Rodriguez" loading="lazy">
                     <div class="team-card-overlay"></div>
                     <div class="team-card-label">
@@ -759,7 +853,7 @@
                     <div class="team-card-border"></div>
                 </div>
 
-                <div class="team-card fade-up stagger-3" onclick="openModal(2)">
+                <div class="team-card fade-up stagger-3" onclick="openModal(2)" onkeydown="if(event.key==='Enter')openModal(2)" role="button" tabindex="0" aria-label="Ver perfil de Enrique Gonzalez">
                     <img class="team-card-img" src="https://chronosiradio.online/wp-content/uploads/2025/09/Imagen-de-WhatsApp-2025-09-25-a-las-14.11.58_fc415b84-300x400.jpg" alt="Enrique Gonzalez" loading="lazy">
                     <div class="team-card-overlay"></div>
                     <div class="team-card-label">
@@ -772,7 +866,7 @@
                     <div class="team-card-border"></div>
                 </div>
 
-                <div class="team-card fade-up stagger-4" onclick="openModal(3)">
+                <div class="team-card fade-up stagger-4" onclick="openModal(3)" onkeydown="if(event.key==='Enter')openModal(3)" role="button" tabindex="0" aria-label="Ver perfil de Franmary Fernandez">
                     <img class="team-card-img" src="https://chronosiradio.online/wp-content/uploads/2025/10/fran-scaled-300x400.jpg" alt="Franmary Fernandez" loading="lazy">
                     <div class="team-card-overlay"></div>
                     <div class="team-card-label">
@@ -785,7 +879,7 @@
                     <div class="team-card-border"></div>
                 </div>
 
-                <div class="team-card fade-up" onclick="openModal(4)">
+                <div class="team-card fade-up" onclick="openModal(4)" onkeydown="if(event.key==='Enter')openModal(4)" role="button" tabindex="0" aria-label="Ver perfil de Victor Grinfelds">
                     <img class="team-card-img" src="https://chronosiradio.online/wp-content/uploads/2025/10/victor-300x400.jpg" alt="Victor Grinfelds" loading="lazy">
                     <div class="team-card-overlay"></div>
                     <div class="team-card-label">
@@ -802,7 +896,7 @@
     </section>
 
     <!-- Team Modal -->
-    <div class="modal-backdrop" id="teamModal" onclick="closeModal(event)">
+    <div class="modal-backdrop" id="teamModal" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="Informacion del miembro del equipo">
         <div class="modal-card" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeModal()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -838,28 +932,30 @@
                     Contacto
                 </span>
                 <h2>Conecta con nosotros</h2>
-                <p>Siguenos en nuestras redes sociales y se parte de la comunidad.</p>
+                <p>Comparte tus recuerdos, solicita tus canciones favoritas y se parte de nuestra comunidad.</p>
             </div>
             <div class="social-grid fade-up">
-                <a href="https://wa.me/qr/2DUYA6GKYEP6I1" target="_blank" rel="noopener" class="social-link whatsapp">
+                <a href="https://wa.me/qr/2DUYA6GKYEP6I1" target="_blank" rel="noopener" class="social-link whatsapp" aria-label="Contactar por WhatsApp">
                     <svg viewBox="0 0 448 512" fill="currentColor"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
                     <span>WhatsApp</span>
                 </a>
-                <a href="https://www.instagram.com/chronos_iradio" target="_blank" rel="noopener" class="social-link instagram">
+                <a href="https://www.instagram.com/chronos_iradio" target="_blank" rel="noopener" class="social-link instagram" aria-label="Seguir en Instagram">
                     <svg viewBox="0 0 448 512" fill="currentColor"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
                     <span>Instagram</span>
                 </a>
-                <a href="https://whatsapp.com/channel/0029Vb71Xvi05MUjSz673L1W" target="_blank" rel="noopener" class="social-link whatsapp">
+                <a href="https://whatsapp.com/channel/0029Vb71Xvi05MUjSz673L1W" target="_blank" rel="noopener" class="social-link whatsapp" aria-label="Unirse al canal de WhatsApp">
                     <svg viewBox="0 0 448 512" fill="currentColor"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
                     <span>Canal WhatsApp</span>
                 </a>
-                <a href="http://t.me/Km_rodriguez" target="_blank" rel="noopener" class="social-link telegram">
+                <a href="http://t.me/Km_rodriguez" target="_blank" rel="noopener" class="social-link telegram" aria-label="Contactar por Telegram">
                     <svg viewBox="0 0 496 512" fill="currentColor"><path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62-45.7-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5l-142 89.4-61.2-19.1c-13.3-4.2-13.6-13.3 2.8-19.7l239.1-92.2c11.1-4 20.8 2.7 17.2 19.5z"/></svg>
                     <span>Telegram</span>
                 </a>
             </div>
         </div>
     </section>
+
+    </main>
 
     <!-- Footer -->
     <footer class="site-footer">
@@ -1133,7 +1229,11 @@
 
         // ===== MOBILE NAV =====
         function toggleMobileNav() {
-            document.getElementById('mobileNav').classList.toggle('open');
+            var nav = document.getElementById('mobileNav');
+            var btn = document.getElementById('menuToggle');
+            nav.classList.toggle('open');
+            var isOpen = nav.classList.contains('open');
+            if (btn) btn.setAttribute('aria-expanded', isOpen);
         }
 
         // ===== SCROLL ANIMATIONS =====
