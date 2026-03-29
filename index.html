@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronos iRadio</title>
+    <meta name="description" content="Chronos iRadio - Tu radio online desde Venezuela. Escucha en vivo la mejor programacion radial.">
+    <link rel="icon" href="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-32x32.jpg" sizes="32x32">
+    <link rel="apple-touch-icon" href="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-180x180.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a2e;
+            --bg-glass: rgba(26, 26, 46, 0.6);
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b8;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-cyan: #06b6d4;
+            --gradient-main: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            padding-bottom: 100px;
+        }
+
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
+        button { border: none; cursor: pointer; font-family: inherit; }
+
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* ===== BG GLOW ===== */
+        .bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .bg-glow::before, .bg-glow::after { content: ''; position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.15; animation: floatGlow 15s ease-in-out infinite alternate; }
+        .bg-glow::before { width: 600px; height: 600px; background: var(--accent-purple); top: -200px; right: -100px; }
+        .bg-glow::after { width: 500px; height: 500px; background: var(--accent-blue); bottom: -150px; left: -100px; animation-delay: -7s; }
+        @keyframes floatGlow { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(50px,30px) scale(1.1); } }
+
+        /* ===== NAVBAR ===== */
+        .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 0; transition: var(--transition); background: transparent; }
+        .navbar.scrolled { background: rgba(10,10,15,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 0; box-shadow: 0 4px 30px rgba(0,0,0,0.3); }
+        .navbar .container { display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo img { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; }
+        .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+        .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); transition: var(--transition); position: relative; }
+        .nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
+        .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--gradient-main); transition: var(--transition); border-radius: 2px; }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-live-badge { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); border-radius: 100px; font-size: 0.85rem; font-weight: 600; color: #ef4444; transition: var(--transition); }
+        .nav-live-badge:hover { background: rgba(239,68,68,0.25); }
+        .live-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+        .menu-toggle { display: none; flex-direction: column; gap: 5px; background: none; padding: 8px; }
+        .menu-toggle span { width: 24px; height: 2px; background: var(--text-primary); border-radius: 2px; transition: var(--transition); }
+
+        /* ===== HERO ===== */
+        .hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 20px 80px; overflow: hidden; }
+        .hero-bg { position: absolute; inset: 0; z-index: 0; }
+        .hero-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.2; filter: blur(2px); }
+        .hero-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,15,0.3) 0%, rgba(10,10,15,0.6) 50%, rgba(10,10,15,1) 100%); }
+        .hero-content { position: relative; z-index: 1; max-width: 700px; }
+        .hero-logo { width: 120px; height: 120px; border-radius: 30px; margin: 0 auto 32px; box-shadow: 0 0 60px rgba(59,130,246,0.3); animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 16px; }
+        .hero h1 span { background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero p { font-size: 1.15rem; color: var(--text-secondary); margin-bottom: 40px; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; border-radius: 100px; font-size: 1rem; font-weight: 600; transition: var(--transition); }
+        .btn-primary { background: var(--gradient-main); color: #fff; box-shadow: 0 4px 24px rgba(59,130,246,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(59,130,246,0.4); }
+        .btn-secondary { background: var(--bg-glass); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .btn svg { width: 20px; height: 20px; }
+
+        /* ===== SECTION COMMON ===== */
+        section { position: relative; z-index: 1; padding: 80px 0; }
+        .section-header { text-align: center; margin-bottom: 48px; }
+        .section-tag { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 100px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); font-size: 0.85rem; font-weight: 600; color: var(--accent-blue); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; margin-bottom: 12px; }
+        .section-header p { color: var(--text-secondary); font-size: 1.05rem; max-width: 600px; margin: 0 auto; }
+
+        /* ===== PROGRAMS - SCHEDULE/CRONOGRAMA ===== */
+        .schedule-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .schedule-item {
+            display: flex;
+            align-items: stretch;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            transition: var(--transition);
+            cursor: default;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .schedule-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(59,130,246,0.05) 0%, transparent 100%);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .schedule-item:hover::before { opacity: 1; }
+
+        .schedule-item:first-child { border-top: 1px solid rgba(255,255,255,0.06); }
+
+        .schedule-item:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .schedule-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            flex-shrink: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.15);
+            position: relative;
+            z-index: 1;
+        }
+
+        .schedule-item:hover .schedule-number {
+            color: var(--accent-blue);
+        }
+
+        .schedule-img {
+            width: 480px;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .schedule-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.5s ease;
+        }
+
+        .schedule-item:hover .schedule-img img {
+            transform: scale(1.03);
+        }
+
+        .schedule-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 24px 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .schedule-info h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            transition: var(--transition);
+        }
+
+        .schedule-item:hover .schedule-info h3 {
+            color: var(--accent-blue);
+        }
+
+        .schedule-info p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-width: 500px;
+        }
+
+        .schedule-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            background: rgba(139,92,246,0.1);
+            border: 1px solid rgba(139,92,246,0.2);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            width: fit-content;
+        }
+
+        /* ===== TEAM GRID + MODAL ===== */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .team-card {
+            position: relative;
+            border-radius: var(--radius);
+            overflow: hidden;
+            cursor: pointer;
+            aspect-ratio: 3/4;
+            group: true;
+        }
+
+        .team-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease, filter 0.3s ease;
+        }
+
+        .team-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(10,10,15,0.9) 100%);
+            transition: var(--transition);
+        }
+
+        .team-card:hover .team-card-overlay {
+            background: linear-gradient(180deg, transparent 20%, rgba(10,10,15,0.95) 85%);
+        }
+
+        .team-card:hover .team-card-img {
+            transform: scale(1.06);
+        }
+
+        .team-card-label {
+            position: absolute;
+            bottom: 0;
+            left: 0; right: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .team-card-label h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .team-card-label span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .team-card-border {
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius);
+            border: 2px solid transparent;
+            transition: var(--transition);
+            pointer-events: none;
+        }
+
+        .team-card:hover .team-card-border {
+            border-color: var(--accent-cyan);
+            box-shadow: inset 0 0 30px rgba(6,182,212,0.1);
+        }
+
+        .team-card-hint {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: var(--transition);
+        }
+
+        .team-card:hover .team-card-hint {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .team-card-hint svg {
+            width: 16px; height: 16px;
+            color: #fff;
+        }
+
+        /* ===== TEAM MODAL ===== */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(0,0,0,0);
+            backdrop-filter: blur(0px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            transition: background 0.4s ease, backdrop-filter 0.4s ease;
+        }
+
+        .modal-backdrop.active {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(12px);
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            display: flex;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            position: fixed;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease, border-radius 0.4s ease;
+        }
+
+        .modal-backdrop.active .modal-card {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-img-wrap {
+            width: 260px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-body {
+            flex: 1;
+            padding: 40px 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .modal-body h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .modal-role {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+        }
+
+        .modal-body p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            background: rgba(239,68,68,0.4);
+            border-color: rgba(239,68,68,0.5);
+        }
+
+        .modal-close svg { width: 18px; height: 18px; }
+
+        /* ===== ANNIVERSARY ===== */
+        .anniversary { padding: 60px 0; }
+        .anniversary-card { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--gradient-main); padding: 3px; }
+        .anniversary-inner { border-radius: calc(var(--radius) - 3px); overflow: hidden; }
+        .anniversary-inner img { width: 100%; display: block; }
+
+        /* ===== SOCIAL ===== */
+        .social-section { padding: 60px 0; }
+        .social-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .social-link { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: var(--radius); background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); font-weight: 500; font-size: 0.95rem; transition: var(--transition); }
+        .social-link:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.15); box-shadow: var(--shadow); }
+        .social-link svg { width: 24px; height: 24px; flex-shrink: 0; }
+        .social-link.whatsapp:hover { border-color: rgba(37,211,102,0.5); }
+        .social-link.instagram:hover { border-color: rgba(225,48,108,0.5); }
+        .social-link.telegram:hover { border-color: rgba(0,136,204,0.5); }
+        .social-link.whatsapp svg { color: #25d366; }
+        .social-link.instagram svg { color: #e1306c; }
+        .social-link.telegram svg { color: #0088cc; }
+
+        /* ===== FOOTER PLAYER (OnlineRadioBox) ===== */
+        .player-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 200;
+            background: rgba(12,12,20,0.95);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 16px 0;
+        }
+
+        .player-bar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* Override ORB widget colors only - keep original dimensions */
+        .player-bar .orbP {
+            background-color: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            overflow: visible !important;
+        }
+
+        .player-bar .orbPhc {
+            padding: 14px 10px !important;
+            overflow: visible !important;
+        }
+
+        .player-bar .orbPp,
+        .player-bar .orbPs {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+            border-radius: 50% !important;
+        }
+
+        .player-bar .orbPp::before {
+            border-color: transparent transparent transparent #ffffff !important;
+        }
+
+        .player-bar .orbPs::before {
+            border-color: #ffffff !important;
+        }
+
+        .player-bar .orbPti {
+            border-radius: 8px !important;
+        }
+
+        .player-bar .orbPtn {
+            color: var(--text-primary) !important;
+            font-family: 'Space Grotesk', sans-serif !important;
+        }
+
+        .player-bar .orbPtt,
+        .player-bar .orbPtt:hover {
+            color: var(--text-secondary) !important;
+        }
+
+        .player-bar .orbV {
+            background-color: rgba(12,12,20,0.95) !important;
+            box-shadow: 0 0 24px 24px rgba(12,12,20,0.95) !important;
+        }
+
+        .player-bar .orbVC::after,
+        .player-bar .orbVb::after {
+            border-color: transparent var(--accent-blue) transparent transparent !important;
+        }
+
+        .player-bar .orbVb::before,
+        .player-bar .orbVCs {
+            background: var(--accent-blue) !important;
+        }
+
+        .player-bar .orbVb > ._m::before,
+        .player-bar .orbVb > ._m::after {
+            border-color: var(--accent-blue) !important;
+        }
+
+        .player-bar .orbPh > img {
+            opacity: 0.4 !important;
+        }
+
+        /* ===== SITE FOOTER ===== */
+        .site-footer { text-align: center; padding: 40px 20px 20px; color: var(--text-secondary); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.06); }
+        .site-footer a { color: var(--accent-blue); }
+
+        /* ===== MOBILE NAV ===== */
+        .mobile-nav { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 150; background: rgba(10,10,15,0.98); backdrop-filter: blur(20px); flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+        .mobile-nav.open { display: flex; }
+        .mobile-nav a { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 600; color: var(--text-secondary); transition: var(--transition); }
+        .mobile-nav a:hover { color: var(--text-primary); }
+        .mobile-nav-close { position: absolute; top: 20px; right: 20px; background: none; color: var(--text-primary); padding: 8px; }
+        .mobile-nav-close svg { width: 28px; height: 28px; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .menu-toggle { display: flex; }
+            .hero { min-height: 90vh; padding: 100px 20px 60px; }
+            .hero-logo { width: 90px; height: 90px; border-radius: 24px; }
+            section { padding: 60px 0; }
+
+            .schedule-item { flex-direction: column; }
+            .schedule-number { width: 100%; height: 40px; justify-content: flex-start; padding-left: 16px; }
+            .schedule-img { width: 100%; }
+            .schedule-img img { width: 100%; }
+            .schedule-info { padding: 16px; }
+
+            .team-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+            .modal-card { flex-direction: column; max-height: 90vh; }
+            .modal-img-wrap { width: 100%; height: 250px; }
+
+            .social-link span { display: none; }
+            .social-link { padding: 14px; }
+
+            .player-bar .orbPtn { font-size: 14px !important; }
+            .player-bar .orbPtt { font-size: 11px !important; }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 2.2rem; }
+            .team-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* ===== SCROLL ANIMATIONS ===== */
+        .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+        .stagger-1 { transition-delay: 0.05s; }
+        .stagger-2 { transition-delay: 0.1s; }
+        .stagger-3 { transition-delay: 0.15s; }
+        .stagger-4 { transition-delay: 0.2s; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="logo">
+                <img src="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-192x192.jpg" alt="Chronos iRadio">
+                <span class="logo-text">Chronos iRadio</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#inicio" class="active">Inicio</a></li>
+                <li><a href="#programas">Programas</a></li>
+                <li><a href="#equipo">Equipo</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+            <a href="#playerBar" class="nav-live-badge">
+                <span class="live-dot"></span>
+                EN VIVO
+            </a>
+            <button class="menu-toggle" onclick="toggleMobileNav()" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-nav" id="mobileNav">
+        <button class="mobile-nav-close" onclick="toggleMobileNav()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <a href="#inicio" onclick="toggleMobileNav()">Inicio</a>
+        <a href="#programas" onclick="toggleMobileNav()">Programas</a>
+        <a href="#equipo" onclick="toggleMobileNav()">Equipo</a>
+        <a href="#contacto" onclick="toggleMobileNav()">Contacto</a>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero" id="inicio">
+        <div class="hero-bg">
+            <img src="https://chronosiradio.online/wp-content/uploads/2026/01/banner-chronos.jpeg" alt="Chronos iRadio Background">
+        </div>
+        <div class="hero-content">
+            <img class="hero-logo" src="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-192x192.jpg" alt="Chronos iRadio Logo">
+            <h1><span>Chronos iRadio</span></h1>
+            <p>Tu radio online desde Venezuela. La mejor programacion, musica y contenido radial al alcance de un clic.</p>
+            <div class="hero-actions">
+                <a href="#playerBar" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Escuchar en Vivo
+                </a>
+                <a href="#programas" class="btn btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Ver Programas
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Programs - Cronograma -->
+    <section id="programas">
+        <div class="container">
+            <div class="section-header fade-up">
+                <span class="section-tag">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                    Programacion
+                </span>
+                <h2>Nuestros Programas</h2>
+                <p>Contenido variado para todos los gustos. Musica, tecnologia, cultura y mucho mas.</p>
+            </div>
+
+            <div class="schedule-list">
+                <div class="schedule-item fade-up stagger-1">
+                    <div class="schedule-number">01</div>
+                    <div class="schedule-img">
+                        <img src="https://chronosiradio.online/wp-content/uploads/2025/11/banner-navegando-entre-decadas-1.png" alt="Navegando entre Decadas" loading="lazy">
+                    </div>
+                    <div class="schedule-info">
+                        <h3>Navegando entre Decadas</h3>
+                        <p>Un recorrido musical a traves de las mejores canciones de diferentes epocas y generos que marcaron generaciones.</p>
+                        <span class="schedule-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                            Musical
+                        </span>
+                    </div>
+                </div>
+
+                <div class="schedule-item fade-up stagger-2">
+                    <div class="schedule-number">02</div>
+                    <div class="schedule-img">
+                        <img src="https://chronosiradio.online/wp-content/uploads/2025/11/banner-chronos-icom.png" alt="Chronos iCom" loading="lazy">
+                    </div>
+                    <div class="schedule-info">
+                        <h3>Chronos iCom</h3>
+                        <p>Microprograma de comunicacion y entretenimiento conducido por las nuevas voces de la radio.</p>
+                        <span class="schedule-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                            Entretenimiento
+                        </span>
+                    </div>
+                </div>
+
+                <div class="schedule-item fade-up stagger-3">
+                    <div class="schedule-number">03</div>
+                    <div class="schedule-img">
+                        <img src="https://chronosiradio.online/wp-content/uploads/2025/11/banner-top5-definitivo.png" alt="Top 5" loading="lazy">
+                    </div>
+                    <div class="schedule-info">
+                        <h3>Top 5</h3>
+                        <p>Los cinco temas mas populares y escuchados de la semana en un solo programa.</p>
+                        <span class="schedule-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M2 20h2V8l4 2V6L2 2v18zm6 0h2v-7l4 2V9l-4-2-2-1v14zm6 0h2V4l4 2V2l-6-0v18zm6 0h2V2h-2v18z"/></svg>
+                            Ranking
+                        </span>
+                    </div>
+                </div>
+
+                <div class="schedule-item fade-up stagger-4">
+                    <div class="schedule-number">04</div>
+                    <div class="schedule-img">
+                        <img src="https://chronosiradio.online/wp-content/uploads/2025/11/banner-mundo-marino.png" alt="Mundo Marino" loading="lazy">
+                    </div>
+                    <div class="schedule-info">
+                        <h3>Mundo Marino</h3>
+                        <p>Micro radial dedicado al fascinante mundo marino con Km Rodriguez. Explorando la vida bajo el agua.</p>
+                        <span class="schedule-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                            Cultura
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team -->
+    <section id="equipo">
+        <div class="container">
+            <div class="section-header fade-up">
+                <span class="section-tag">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    Equipo
+                </span>
+                <h2>Quienes Somos</h2>
+                <p>Conoce a las personas detras de Chronos iRadio. Haz clic para saber mas.</p>
+            </div>
+
+            <div class="team-grid">
+                <div class="team-card fade-up stagger-1" onclick="openModal(0)">
+                    <img class="team-card-img" src="https://chronosiradio.online/wp-content/uploads/2025/09/Imagen-de-WhatsApp-2025-09-25-a-las-14.11.57_bd4a09af-300x400.jpg" alt="Km Rodriguez" loading="lazy">
+                    <div class="team-card-overlay"></div>
+                    <div class="team-card-label">
+                        <h3>Km Rodriguez</h3>
+                        <span>Creador & Director</span>
+                    </div>
+                    <div class="team-card-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
+                    </div>
+                    <div class="team-card-border"></div>
+                </div>
+
+                <div class="team-card fade-up stagger-2" onclick="openModal(1)">
+                    <img class="team-card-img" src="https://chronosiradio.online/wp-content/uploads/2025/09/Imagen-de-WhatsApp-2025-09-25-a-las-14.13.22_6d59c73b-300x400.jpg" alt="Eryx Rodriguez" loading="lazy">
+                    <div class="team-card-overlay"></div>
+                    <div class="team-card-label">
+                        <h3>Eryx Rodriguez</h3>
+                        <span>Produccion & Locutor</span>
+                    </div>
+                    <div class="team-card-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
+                    </div>
+                    <div class="team-card-border"></div>
+                </div>
+
+                <div class="team-card fade-up stagger-3" onclick="openModal(2)">
+                    <img class="team-card-img" src="https://chronosiradio.online/wp-content/uploads/2025/09/Imagen-de-WhatsApp-2025-09-25-a-las-14.11.58_fc415b84-300x400.jpg" alt="Enrique Gonzalez" loading="lazy">
+                    <div class="team-card-overlay"></div>
+                    <div class="team-card-label">
+                        <h3>Enrique Gonzalez</h3>
+                        <span>Voz & Imagen</span>
+                    </div>
+                    <div class="team-card-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
+                    </div>
+                    <div class="team-card-border"></div>
+                </div>
+
+                <div class="team-card fade-up stagger-4" onclick="openModal(3)">
+                    <img class="team-card-img" src="https://chronosiradio.online/wp-content/uploads/2025/10/fran-scaled-300x400.jpg" alt="Franmary Fernandez" loading="lazy">
+                    <div class="team-card-overlay"></div>
+                    <div class="team-card-label">
+                        <h3>Franmary Fernandez</h3>
+                        <span>Locutora</span>
+                    </div>
+                    <div class="team-card-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
+                    </div>
+                    <div class="team-card-border"></div>
+                </div>
+
+                <div class="team-card fade-up" onclick="openModal(4)">
+                    <img class="team-card-img" src="https://chronosiradio.online/wp-content/uploads/2025/10/victor-300x400.jpg" alt="Victor Grinfelds" loading="lazy">
+                    <div class="team-card-overlay"></div>
+                    <div class="team-card-label">
+                        <h3>Victor Grinfelds</h3>
+                        <span>Ingeniero</span>
+                    </div>
+                    <div class="team-card-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
+                    </div>
+                    <div class="team-card-border"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Modal -->
+    <div class="modal-backdrop" id="teamModal" onclick="closeModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div class="modal-img-wrap">
+                <img id="modalImg" src="" alt="">
+            </div>
+            <div class="modal-body">
+                <h2 id="modalName"></h2>
+                <div class="modal-role" id="modalRole"></div>
+                <p id="modalDesc"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Anniversary -->
+    <section class="anniversary">
+        <div class="container">
+            <div class="anniversary-card fade-up">
+                <div class="anniversary-inner">
+                    <img src="https://chronosiradio.online/wp-content/uploads/2025/11/banner-aniversario-final-2-1024x346.png" alt="1er Aniversario Chronos iRadio" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social / Contact -->
+    <section class="social-section" id="contacto">
+        <div class="container">
+            <div class="section-header fade-up">
+                <span class="section-tag">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    Contacto
+                </span>
+                <h2>Conecta con nosotros</h2>
+                <p>Siguenos en nuestras redes sociales y se parte de la comunidad.</p>
+            </div>
+            <div class="social-grid fade-up">
+                <a href="https://wa.me/qr/2DUYA6GKYEP6I1" target="_blank" rel="noopener" class="social-link whatsapp">
+                    <svg viewBox="0 0 448 512" fill="currentColor"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+                    <span>WhatsApp</span>
+                </a>
+                <a href="https://www.instagram.com/chronos_iradio" target="_blank" rel="noopener" class="social-link instagram">
+                    <svg viewBox="0 0 448 512" fill="currentColor"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
+                    <span>Instagram</span>
+                </a>
+                <a href="https://whatsapp.com/channel/0029Vb71Xvi05MUjSz673L1W" target="_blank" rel="noopener" class="social-link whatsapp">
+                    <svg viewBox="0 0 448 512" fill="currentColor"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+                    <span>Canal WhatsApp</span>
+                </a>
+                <a href="http://t.me/Km_rodriguez" target="_blank" rel="noopener" class="social-link telegram">
+                    <svg viewBox="0 0 496 512" fill="currentColor"><path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62-45.7-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5l-142 89.4-61.2-19.1c-13.3-4.2-13.6-13.3 2.8-19.7l239.1-92.2c11.1-4 20.8 2.7 17.2 19.5z"/></svg>
+                    <span>Telegram</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2025 Chronos iRadio. Todos los derechos reservados. | <a href="https://chronosiradio.online">chronosiradio.online</a> | @chronos_iradio</p>
+        </div>
+    </footer>
+
+    <!-- Fixed Player Bar -->
+    <div class="player-bar" id="playerBar">
+        <div class="player-bar-inner">
+            <!--OnlineRadioBox Player widget-->
+            <div class="orbP" id="orb_player_145cb053ba408304" vlm="0.8">
+            <style media="screen">
+              .orbP{position:relative;box-sizing:border-box;overflow:hidden;font-weight:normal;border:1px solid transparent;user-select:none;text-align:left}.orbP br,.orbP>br{display:none!important}.orbP p,.orbP>p{margin:0!important;padding:0!important;line-height:normal!important;font-size:inherit!important}.orbPh{display:block;position:absolute;z-index:100;top:50%;margin-top:-12px!important;right:10px;width:21px!important;text-decoration:none!important;cursor:pointer}.orbPh>img{margin:0!important;border:none;height:24px!important;-webkit-filter:drop-shadow(2px 2px 0 rgba(47,99,160,.2));filter:drop-shadow(2px 2px 0 rgba(47,99,160,.2))}.orbPt{text-decoration:none!important}.orbPti{float:left;margin:0 10px 0 0!important;vertical-align:top!important;height:48px!important;width:89px!important;border:none!important;border-radius:2px!important;opacity:1!important}.orbPtn{display:block;margin-right:52px;line-height:24px!important;font-size:17px!important;font-weight:bold!important;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}.orbPtt{display:block;margin-right:52px;text-decoration:none!important;line-height:24px!important;font-size:12px!important;opacity:.85;transition:opacity .2s;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}.orbPtt:hover{opacity:1}.orbPp,.orbPs{float:left!important;margin:0 10px 0 0!important;padding:0!important;height:48px!important;width:48px!important;line-height:48px!important;border-radius:2px!important;border:none!important;text-align:center!important;cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none!important}.orbPp::before,.orbPs::before{display:inline-block;vertical-align:middle;content:'';width:0;height:0;border-style:solid}.orbPp::before{border-width:16px 0 16px 26px}.orbPs::before{border-width:16px}.orbPp:hover,.orbPs:hover{-webkit-transform:scale(1.087);transform:scale(1.087)}.orbPhc{position:relative!important;box-sizing:border-box!important;padding:10px!important;overflow:hidden}
+              .orbPpl{position:relative;overflow:auto;overflow-x:hidden;overflow-y:auto;margin:0!important;padding:0!important;list-style:none!important}.orbPpli{box-sizing:border-box;margin:0!important;padding:0 10px!important;list-style:none!important;background-image:none;float:none!important;height:auto!important}.orbPpli>a,.orbPpli>span{display:block!important;padding:0!important;margin:0!important;height:auto!important;font-weight:normal!important;text-decoration:none!important;line-height:32px!important;font-size:14px!important;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;transition:color .125s;border:none!important;text-align:left!important}.orbPpli>a:hover,.orbPpli>span:hover{background:transparent!important}.orbPpli>a>time,.orbPpli>span>time{display:inline-block;font-size:12px!important;width:3em!important}.orbPpli+li{border-style:solid!important;border-width:1px 0 0!important}
+              .orbV{position:absolute;z-index:1!important;width:24px!important;right:48px!important;top:0!important;bottom:0!important;line-height:1!important;overflow:hidden!important;transition:width .3s}.orbV:hover{width:160px!important}.orbVC{position:absolute!important;height:18px!important;left:24px!important;top:50%!important;margin:-9px 0 0 11px!important}.orbVC::after{display:block;content:'';margin-top:4px;width:0;height:0;border-style:solid;border-width:4px 100px 4px 0;opacity:.33}.orbVCs{position:absolute!important;z-index:2!important;top:0!important;width:18px!important;height:18px!important;border-radius:50%!important;cursor:ew-resize!important;box-shadow:0 6px 8px -2px rgba(0,9,18,0.36)}.orbVb{position:absolute!important;width:24px!important;height:24px!important;top:50%!important;left:0!important;margin-top:-12px;white-space:nowrap!important;cursor:pointer;transition:opacity .3s}.orbVb::before{display:inline-block;content:'';vertical-align:middle;width:7px;height:12px}.orbVb::after{display:inline-block;content:'';vertical-align:middle;border-width:12px 12px 12px 0;border-style:solid;height:0;width:0;margin-left:-6px}.orbV:hover .orbVb{opacity:.33!important;cursor:default}.orbVb>._m{display:block!important;width:7px!important;height:18px!important;position:absolute!important;top:50%;margin-top:-9px!important;right:0;overflow:hidden!important}.orbVb>._m::before{display:block;content:'';position:absolute;right:0;top:50%;width:28px;height:24px;margin-top:-12px;border:1px solid;border-radius:50%}.orbVb>._m::after{display:block;content:'';position:absolute;right:4px;top:50%;width:14px;height:14px;margin-top:-7px;border:1px solid;border-radius:50%}
+              .orbF{padding:0 0 10px 10px!important;border-top:1px solid;display:flex;flex-flow:row nowrap!important}
+              .orbFl{margin:0!important;padding:0!important;list-style:none!important}
+              .orbFli,.orbFh{display:inline-block!important;vertical-align:top!important;line-height:18px!important;white-space:nowrap!important;margin:10px 7px 0 0!important;padding:0 6px 0 0!important;text-indent:0!important;list-style:none!important;font-size:11px!important;text-align:right}
+              .orbFlif{float:left!important;width:27px!important;height:18px!important;margin-right:5px!important}
+              .orbFhi{position:relative!important;display:inline-block!important;vertical-align:baseline!important;width:8px!important;height:9px!important;margin:0 8px 0 5px!important;border-style:solid!important;border-width:2px 1px 0 1px!important;border-radius:5px 5px 0 0!important;opacity:.5}
+              .orbFhi::before,.orbFhi::after{display:block;content:'';position:absolute;bottom:-2px;width:0;height:3px;border-style:solid;border-width:2px;border-radius:3px}
+              .orbFhi::before{left:-4px}.orbFhi::after{right:-4px}
+              .orbPm{margin:0!important;padding:0!important;list-style:none!important}
+              .orbPmi{position:relative;margin:0!important;padding:10px!important;list-style:none!important;border:dotted rgba(204,204,204,0.5);border-width:1px 0 0;font-size:12px!important;overflow:hidden;white-space:nowrap;line-height:1!important;cursor:pointer}
+              .orbPmi::before{display:block;content:'';position:absolute;z-index:1;top:50%;right:10px;margin-top:-8px;width:0;height:0;border-style:solid;border-width:8px 0 8px 13px;opacity:.5;transition:opacity .2s}
+              .orbPmi:hover::before{opacity:1}
+              .orbPmi::after{display:block;content:'';position:absolute;top:0;bottom:0;right:0;width:36px}
+              .orbPmii{display:inline-block;vertical-align:middle;margin-right:10px;width:30px;height:16px;border:none!important;border-radius:2px!important}
+              .orbPmin{display:inline-block;vertical-align:middle}
+              .cmpct .orbPti{height:24px!important;width:44px!important}
+              .cmpct .orbPtn{line-height:12px!important;font-size:12px!important}
+              .cmpct .orbPtt{line-height:12px!important;font-size:10px!important}
+              .cmpct .orbPp,.cmpct .orbPs{height:24px!important;width:24px!important;line-height:24px!important}
+              .cmpct .orbPp::before{border-width:8px 0 8px 13px!important}
+              .cmpct .orbPs::before{border-width:8px!important}
+              .cmpct .orbPpli>a,.cmpct .orbPpli>span{line-height:24px!important;font-size:12px!important}
+              .cmpct .orbPpli>a>time,.cmpct .orbPpli>span>time{font-size:11px!important}
+            </style>
+            <style media="screen" id="orb_player_145cb053ba408304_settings">
+              .orbP{background-color:transparent !important;border:none !important;border-radius:0 !important;}
+              .orbPp,.orbPs{background:linear-gradient(135deg, #3b82f6, #8b5cf6) !important;border-radius:50% !important;}
+              .orbPp::before{border-color:transparent transparent transparent #fff !important}
+              .orbPs::before{border-color:#fff !important}
+              .orbPtn,.orbPtt,.orbPtt:hover{color:#f0f0f5 !important;}
+              .orbV{background-color:rgba(12,12,20,0.95) !important;box-shadow:0 0 24px 24px rgba(12,12,20,0.95) !important}
+              .orbVC::after,.orbVb::after{border-color:transparent #3b82f6 transparent transparent !important}
+              .orbVb::before,.orbVCs{background:#3b82f6 !important}
+              .orbVb>._m::before,.orbVb>._m::after{border-color:#3b82f6 !important}
+              .orbPti{border-radius:8px !important}
+              .orbPhc{padding:18px 10px !important;overflow:visible !important}
+            </style>
+            <div class="orbPhc">
+              <a class="orbPh" href="https://onlineradiobox.com/ve/" title="Listen on Online Radio Box!" target="_blank"><img src="https://ecdn.onlineradiobox.com/img/wl.svg" alt="Listen on Online Radio Box!"></a>
+              <audio id="orb_player_145cb053ba408304_p" crossorigin="true" style="width:1px;height:1px;overflow:hidden;position:absolute;"></audio>
+              <button class="orbPp" title="En Vivo" country="ve" alias="chronos" stream="1" autoplay="autoplay"></button>
+              <a class="orbPt" href="https://onlineradiobox.com/ve/chronos/" target="_blank">
+                <img class="orbPti" src="https://cdn.onlineradiobox.com/img/l/1/140421.v2.png" alt="Chronos iRadio">
+                <span class="orbPtn">Chronos iRadio</span>
+              </a>
+              <span class="orbPtt" loading="cargando" playing="en directo" error="error de reproduccion" not_supported="this browser can't play it" external="Escuchar ahora (Abrir en un reproductor emergente)" geo_blocked="No disponible en tu pa&iacute;s"></span>
+              <div class="orbV"><div class="orbVb"><i class="_m"></i></div><div class="orbVC"><div class="orbVCs"></div></div></div>
+            </div>
+            <script>
+              // Fix protocol-relative URLs (//...) when opened via file://
+              if (location.protocol === 'file:') {
+                (function() {
+                  function fixUrl(u) { return (typeof u === 'string' && u.startsWith('//')) ? 'https:' + u : u; }
+
+                  // Patch script.src setter
+                  var desc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+                  if (desc && desc.set) {
+                    var origSet = desc.set;
+                    Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+                      set: function(v) { origSet.call(this, fixUrl(v)); },
+                      get: desc.get, configurable: true
+                    });
+                  }
+
+                  // Patch setAttribute for src/href
+                  var origSetAttr = Element.prototype.setAttribute;
+                  Element.prototype.setAttribute = function(n, v) {
+                    if (n === 'src' || n === 'href') v = fixUrl(v);
+                    return origSetAttr.call(this, n, v);
+                  };
+
+                  // Patch XMLHttpRequest.open
+                  var origXhrOpen = XMLHttpRequest.prototype.open;
+                  XMLHttpRequest.prototype.open = function(method, url) {
+                    arguments[1] = fixUrl(url);
+                    return origXhrOpen.apply(this, arguments);
+                  };
+
+                  // Patch fetch
+                  var origFetch = window.fetch;
+                  window.fetch = function(input) {
+                    if (typeof input === 'string') arguments[0] = fixUrl(input);
+                    return origFetch.apply(this, arguments);
+                  };
+                })();
+              }
+
+              var orbp_w = orbp_w || { lang: "es-es" };
+              orbp_w.cmd = orbp_w.cmd || [];
+              orbp_w.apiUrl = "https://onlineradiobox.com";
+              orbp_w.cmd.push(function() { orbp_w.init("orb_player_145cb053ba408304"); });
+              var s, t; s = document.createElement('script'); s.type = 'text/javascript';
+              s.src = "https://ecdn.onlineradiobox.com/js/pwidget2.min.235ca64e.js";
+              t = document.getElementsByTagName('script')[0]; t.parentNode.insertBefore(s, t);
+            </script>
+            </div>
+            <!--OnlineRadioBox Player widget-->
+        </div>
+    </div>
+
+    <script>
+        // ===== TEAM DATA =====
+        const teamData = [
+            {
+                name: 'Km Rodriguez',
+                role: 'Creador & Director',
+                img: 'https://chronosiradio.online/wp-content/uploads/2025/09/Imagen-de-WhatsApp-2025-09-25-a-las-14.11.57_bd4a09af-300x400.jpg',
+                desc: 'Creador de Chronos iRadio. Un sueno de su adolescencia, que comienza a hacerse realidad con esta aventura. Su vision y pasion por la radio lo llevaron a construir este proyecto desde cero.'
+            },
+            {
+                name: 'Eryx Rodriguez',
+                role: 'Produccion & Locutor',
+                img: 'https://chronosiradio.online/wp-content/uploads/2025/09/Imagen-de-WhatsApp-2025-09-25-a-las-14.13.22_6d59c73b-300x400.jpg',
+                desc: 'A pesar de su corta edad, es un amante y conocedor de la buena musica. Esta en la asistencia de produccion y en la conduccion del microprograma Chronos iCom.'
+            },
+            {
+                name: 'Enrique Gonzalez',
+                role: 'Voz & Imagen',
+                img: 'https://chronosiradio.online/wp-content/uploads/2025/09/Imagen-de-WhatsApp-2025-09-25-a-las-14.11.58_fc415b84-300x400.jpg',
+                desc: 'Nuestra voz marca, con un talento increible es el que le imprime la personalidad y la imagen a Chronos iRadio. Ademas complice en esta aventura que conduce a un sueno.'
+            },
+            {
+                name: 'Franmary Fernandez',
+                role: 'Locutora',
+                img: 'https://chronosiradio.online/wp-content/uploads/2025/10/fran-scaled-300x400.jpg',
+                desc: 'Una de las voces que escuchas en Chronos iRadio. Una voz calida sobria con unos matices grandiosos. Licenciada en Comunicacion Social.'
+            },
+            {
+                name: 'Victor Grinfelds',
+                role: 'Ingeniero',
+                img: 'https://chronosiradio.online/wp-content/uploads/2025/10/victor-300x400.jpg',
+                desc: 'Nuestro Ingeniero colaborador principal de Chronos iRadio. El es una de las personas que creen en este proyecto y aporta su mejor esfuerzo en la construccion de esta aventura.'
+            }
+        ];
+
+        // ===== MODAL WITH ORIGIN ANIMATION =====
+        let activeCardIdx = null;
+
+        function getCardEl(idx) {
+            return document.querySelectorAll('.team-card')[idx];
+        }
+
+        function openModal(idx) {
+            activeCardIdx = idx;
+            const m = teamData[idx];
+            const card = getCardEl(idx);
+            const modal = document.getElementById('teamModal');
+            const modalCard = modal.querySelector('.modal-card');
+
+            // Set content
+            document.getElementById('modalImg').src = m.img;
+            document.getElementById('modalImg').alt = m.name;
+            document.getElementById('modalName').textContent = m.name;
+            document.getElementById('modalRole').textContent = m.role;
+            document.getElementById('modalDesc').textContent = m.desc;
+
+            // Get card position
+            const rect = card.getBoundingClientRect();
+            const cardCx = rect.left + rect.width / 2;
+            const cardCy = rect.top + rect.height / 2;
+
+            // Target: center of viewport
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const modalW = Math.min(700, vw * 0.9);
+            const modalH = Math.min(vh * 0.85, 500);
+            const targetX = (vw - modalW) / 2;
+            const targetY = (vh - modalH) / 2;
+            const targetCx = vw / 2;
+            const targetCy = vh / 2;
+
+            // Start from card center, scaled down to card size
+            const scaleX = rect.width / modalW;
+            const scaleY = rect.height / modalH;
+            const startScale = Math.max(scaleX, scaleY);
+            const dx = cardCx - targetCx;
+            const dy = cardCy - targetCy;
+
+            // Set initial state (at card position)
+            modalCard.style.transition = 'none';
+            modalCard.style.left = targetX + 'px';
+            modalCard.style.top = targetY + 'px';
+            modalCard.style.width = modalW + 'px';
+            modalCard.style.maxHeight = modalH + 'px';
+            modalCard.style.transform = `translate(${dx}px, ${dy}px) scale(${startScale})`;
+            modalCard.style.borderRadius = card.style.borderRadius || '16px';
+            modalCard.style.opacity = '0';
+
+            // Activate backdrop
+            modal.classList.add('active');
+
+            // Animate to center
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    modalCard.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease, border-radius 0.4s ease';
+                    modalCard.style.transform = 'translate(0, 0) scale(1)';
+                    modalCard.style.borderRadius = '20px';
+                    modalCard.style.opacity = '1';
+                });
+            });
+
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(e) {
+            if (e && e.target && !e.target.classList.contains('modal-backdrop') && e.type !== 'keydown') return;
+            const modal = document.getElementById('teamModal');
+            const modalCard = modal.querySelector('.modal-card');
+
+            if (activeCardIdx !== null) {
+                const card = getCardEl(activeCardIdx);
+                const rect = card.getBoundingClientRect();
+                const cardCx = rect.left + rect.width / 2;
+                const cardCy = rect.top + rect.height / 2;
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+                const targetCx = vw / 2;
+                const targetCy = vh / 2;
+                const modalW = modalCard.offsetWidth;
+                const modalH = modalCard.offsetHeight;
+                const scaleX = rect.width / modalW;
+                const scaleY = rect.height / modalH;
+                const startScale = Math.max(scaleX, scaleY);
+                const dx = cardCx - targetCx;
+                const dy = cardCy - targetCy;
+
+                // Animate back to card
+                modalCard.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, border-radius 0.3s ease';
+                modalCard.style.transform = `translate(${dx}px, ${dy}px) scale(${startScale})`;
+                modalCard.style.borderRadius = '16px';
+                modalCard.style.opacity = '0';
+
+                // Remove active after animation
+                setTimeout(() => {
+                    modal.classList.remove('active');
+                    modalCard.style.transition = 'none';
+                    document.body.style.overflow = '';
+                    activeCardIdx = null;
+                }, 400);
+            } else {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal(e);
+        });
+
+        // ===== NAVBAR SCROLL =====
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // ===== MOBILE NAV =====
+        function toggleMobileNav() {
+            document.getElementById('mobileNav').classList.toggle('open');
+        }
+
+        // ===== SCROLL ANIMATIONS =====
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+        // ===== ACTIVE NAV LINK =====
+        const sections = document.querySelectorAll('section[id]');
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY + 200;
+            sections.forEach(section => {
+                const top = section.offsetTop;
+                const height = section.offsetHeight;
+                const id = section.getAttribute('id');
+                const link = document.querySelector(`.nav-links a[href="#${id}"]`);
+                if (link) link.classList.toggle('active', scrollY >= top && scrollY < top + height);
+            });
+        });
+    </script>
+</body>
+</html>
