@@ -1,0 +1,53 @@
+# Caddyfile - Chronos iRadio
+# Sirve el sitio estático en 0.0.0.0:8080 (LAN + listo para túnel).
+#
+# Uso:
+#   caddy run --config Caddyfile --adapter caddyfile
+#
+# Si quieres HTTPS automático con tu dominio, sustituye ":8080" por "tu.dominio.tld"
+# y asegúrate de que Caddy pueda resolver el challenge ACME (puertos 80/443 abiertos).
+
+:8080 {
+    root * {$PWD}
+    file_server
+
+    encode zstd gzip
+
+    # Cache agresivo para assets versionables por ruta (imágenes).
+    @assets path /assets/*
+    header @assets Cache-Control "public, max-age=31536000, immutable"
+
+    # CSS y JS: cache corto con revalidación (al no haber hashing, que el navegador revalide).
+    @static path /styles.css /app.js /manifest.json
+    header @static Cache-Control "public, max-age=3600, must-revalidate"
+
+    # HTML: siempre revalidar para reflejar cambios de contenido.
+    @html path / /index.html
+    header @html Cache-Control "no-cache"
+
+    # SEO files: cache medio.
+    @seo path /robots.txt /sitemap.xml /humans.txt
+    header @seo Cache-Control "public, max-age=86400"
+
+    # Security headers.
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+        # CSP: permite Google Fonts y el widget OnlineRadioBox + audio en directo.
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://ecdn.onlineradiobox.com https://onlineradiobox.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://cdn.onlineradiobox.com https://ecdn.onlineradiobox.com; media-src 'self' https://*.onlineradiobox.com https://radio.chronosiradio.online; connect-src 'self' https://onlineradiobox.com https://*.onlineradiobox.com; frame-ancestors 'self'; base-uri 'self'"
+        -Server
+    }
+
+    # MIME explícito para WebP y JSON manifest (Caddy ya los infiere, pero lo dejamos explícito).
+    @webp path *.webp
+    header @webp Content-Type "image/webp"
+
+    log {
+        output stdout
+        format console
+        level INFO
+    }
+}

@@ -9,19 +9,22 @@
     "lang": "es",
     "icons": [
         {
-            "src": "https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-192x192.jpg",
+            "src": "/assets/logo/chronos-192.jpg",
             "sizes": "192x192",
-            "type": "image/jpeg"
+            "type": "image/jpeg",
+            "purpose": "any"
         },
         {
-            "src": "https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-180x180.jpg",
+            "src": "/assets/logo/chronos-180.jpg",
             "sizes": "180x180",
-            "type": "image/jpeg"
+            "type": "image/jpeg",
+            "purpose": "any"
         },
         {
-            "src": "https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-32x32.jpg",
+            "src": "/assets/logo/chronos-32.jpg",
             "sizes": "32x32",
-            "type": "image/jpeg"
+            "type": "image/jpeg",
+            "purpose": "any"
         }
     ]
 }

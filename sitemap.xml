@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    <url>
+        <loc>https://chronosiradio.online/</loc>
+        <lastmod>2026-04-18</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://chronosiradio.online/assets/og/og-banner-chronos.jpeg</image:loc>
+            <image:title>Chronos iRadio - Radio online desde Venezuela</image:title>
+            <image:caption>Chronos iRadio - Los clasicos de la musica de todos los tiempos</image:caption>
+        </image:image>
+        <image:image>
+            <image:loc>https://chronosiradio.online/assets/logo/chronos-192.jpg</image:loc>
+            <image:title>Chronos iRadio - Logo</image:title>
+        </image:image>
+    </url>
+</urlset>

@@ -1,0 +1,26 @@
+# robots.txt - Chronos iRadio
+# https://chronosiradio.online/
+
+User-agent: *
+Allow: /
+
+# No indexar el manifest ni assets sueltos como páginas
+Disallow: /manifest.json
+
+# IA / scrapers agresivos (opt-out, el sitio expone contenido público pero no ofrece datos para entrenamiento)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+Sitemap: https://chronosiradio.online/sitemap.xml
