@@ -32,7 +32,7 @@
     <link rel="icon" href="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-32x32.jpg" sizes="32x32">
     <link rel="icon" href="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-192x192.jpg" sizes="192x192">
     <link rel="apple-touch-icon" href="https://chronosiradio.online/wp-content/uploads/2025/09/cropped-cropped-chronosiradio-180x180.jpg">
-    <link rel="manifest" href="manifest.json">
+    <script>if(location.protocol!=='file:'){var l=document.createElement('link');l.rel='manifest';l.href='manifest.json';document.head.appendChild(l);}</script>
 
     <!-- Performance hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,7 +123,7 @@
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
-            padding-bottom: 100px;
+            padding-bottom: 130px;
         }
 
         a { color: inherit; text-decoration: none; }
@@ -425,8 +425,8 @@
 
         .modal-card {
             display: flex;
-            max-width: 700px;
-            width: 90%;
+            max-width: 860px;
+            width: 52%;
             max-height: 85vh;
             border-radius: 20px;
             overflow: hidden;
@@ -435,17 +435,20 @@
             box-shadow: 0 32px 80px rgba(0,0,0,0.5);
             opacity: 0;
             pointer-events: none;
-            position: fixed;
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease, border-radius 0.4s ease;
+            position: relative;
+            transform: scale(0.85);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+            z-index: 301;
         }
 
         .modal-backdrop.active .modal-card {
             opacity: 1;
+            transform: scale(1);
             pointer-events: auto;
         }
 
         .modal-img-wrap {
-            width: 260px;
+            width: 320px;
             flex-shrink: 0;
             position: relative;
             overflow: hidden;
@@ -513,6 +516,59 @@
 
         .modal-close svg { width: 18px; height: 18px; }
 
+        .modal-sibling {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%) scale(0.65);
+            width: 240px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+            cursor: pointer;
+            z-index: 299;
+            pointer-events: none;
+            opacity: 0;
+            filter: blur(1.5px) brightness(0.7);
+            transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+        }
+        .modal-backdrop.active .modal-sibling {
+            opacity: 0.55;
+            pointer-events: auto;
+            transition: opacity 0.4s ease 0.2s, transform 0.4s ease 0.2s, filter 0.3s ease 0.2s;
+        }
+        .modal-backdrop.active .modal-sibling:hover {
+            opacity: 0.9;
+            filter: blur(0px) brightness(1);
+            transform: translateY(-50%) scale(0.7);
+            transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+        }
+        .modal-sibling-img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+        }
+        .modal-sibling-info {
+            padding: 10px 12px;
+        }
+        .modal-sibling-info h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0 0 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .modal-sibling-info span {
+            font-size: 0.65rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
         /* ===== ANNIVERSARY ===== */
         .anniversary { padding: 60px 0; }
         .anniversary-card { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--gradient-main); padding: 3px; }
@@ -541,7 +597,7 @@
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border-top: 1px solid rgba(255,255,255,0.08);
-            padding: 16px 0;
+            padding: 4px 0;
         }
 
         .player-bar-inner {
@@ -550,7 +606,7 @@
             padding: 0 16px;
         }
 
-        /* Override ORB widget colors only - keep original dimensions */
+/* Override ORB widget colors only - keep original dimensions */
         .player-bar .orbP {
             background-color: transparent !important;
             border: none !important;
@@ -645,6 +701,7 @@
 
             .modal-card { flex-direction: column; max-height: 90vh; }
             .modal-img-wrap { width: 100%; height: 250px; }
+            .modal-sibling { display: none; }
 
             .social-link span { display: none; }
             .social-link { padding: 14px; }
@@ -897,6 +954,13 @@
 
     <!-- Team Modal -->
     <div class="modal-backdrop" id="teamModal" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="Informacion del miembro del equipo">
+        <div class="modal-sibling modal-sibling-prev" id="siblingPrev" onclick="navigateModal(-1)" role="button" tabindex="0" aria-label="Miembro anterior">
+            <img class="modal-sibling-img" id="siblingPrevImg" src="" alt="">
+            <div class="modal-sibling-info">
+                <h4 id="siblingPrevName"></h4>
+                <span id="siblingPrevRole"></span>
+            </div>
+        </div>
         <div class="modal-card" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeModal()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -908,6 +972,13 @@
                 <h2 id="modalName"></h2>
                 <div class="modal-role" id="modalRole"></div>
                 <p id="modalDesc"></p>
+            </div>
+        </div>
+        <div class="modal-sibling modal-sibling-next" id="siblingNext" onclick="navigateModal(1)" role="button" tabindex="0" aria-label="Miembro siguiente">
+            <img class="modal-sibling-img" id="siblingNextImg" src="" alt="">
+            <div class="modal-sibling-info">
+                <h4 id="siblingNextName"></h4>
+                <span id="siblingNextRole"></span>
             </div>
         </div>
     </div>
@@ -967,7 +1038,8 @@
     <!-- Fixed Player Bar -->
     <div class="player-bar" id="playerBar">
         <div class="player-bar-inner">
-            <!--OnlineRadioBox Player widget-->
+
+<!--OnlineRadioBox Player widget-->
             <div class="orbP" id="orb_player_145cb053ba408304" vlm="0.8">
             <style media="screen">
               .orbP{position:relative;box-sizing:border-box;overflow:hidden;font-weight:normal;border:1px solid transparent;user-select:none;text-align:left}.orbP br,.orbP>br{display:none!important}.orbP p,.orbP>p{margin:0!important;padding:0!important;line-height:normal!important;font-size:inherit!important}.orbPh{display:block;position:absolute;z-index:100;top:50%;margin-top:-12px!important;right:10px;width:21px!important;text-decoration:none!important;cursor:pointer}.orbPh>img{margin:0!important;border:none;height:24px!important;-webkit-filter:drop-shadow(2px 2px 0 rgba(47,99,160,.2));filter:drop-shadow(2px 2px 0 rgba(47,99,160,.2))}.orbPt{text-decoration:none!important}.orbPti{float:left;margin:0 10px 0 0!important;vertical-align:top!important;height:48px!important;width:89px!important;border:none!important;border-radius:2px!important;opacity:1!important}.orbPtn{display:block;margin-right:52px;line-height:24px!important;font-size:17px!important;font-weight:bold!important;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}.orbPtt{display:block;margin-right:52px;text-decoration:none!important;line-height:24px!important;font-size:12px!important;opacity:.85;transition:opacity .2s;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}.orbPtt:hover{opacity:1}.orbPp,.orbPs{float:left!important;margin:0 10px 0 0!important;padding:0!important;height:48px!important;width:48px!important;line-height:48px!important;border-radius:2px!important;border:none!important;text-align:center!important;cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none!important}.orbPp::before,.orbPs::before{display:inline-block;vertical-align:middle;content:'';width:0;height:0;border-style:solid}.orbPp::before{border-width:16px 0 16px 26px}.orbPs::before{border-width:16px}.orbPp:hover,.orbPs:hover{-webkit-transform:scale(1.087);transform:scale(1.087)}.orbPhc{position:relative!important;box-sizing:border-box!important;padding:10px!important;overflow:hidden}
@@ -1007,11 +1079,14 @@
               .orbVb::before,.orbVCs{background:#3b82f6 !important}
               .orbVb>._m::before,.orbVb>._m::after{border-color:#3b82f6 !important}
               .orbPti{border-radius:8px !important}
-              .orbPhc{padding:18px 10px !important;overflow:visible !important}
+              .orbPhc{padding:14px 10px !important;overflow:visible !important}
+              .orbPtn{line-height:24px !important;min-height:24px !important}
+              .orbPtt{line-height:24px !important;min-height:24px !important}
+              .orbPp,.orbPs{min-height:48px !important}
             </style>
             <div class="orbPhc">
               <a class="orbPh" href="https://onlineradiobox.com/ve/" title="Listen on Online Radio Box!" target="_blank"><img src="https://ecdn.onlineradiobox.com/img/wl.svg" alt="Listen on Online Radio Box!"></a>
-              <audio id="orb_player_145cb053ba408304_p" crossorigin="true" style="width:1px;height:1px;overflow:hidden;position:absolute;"></audio>
+              <audio id="orb_player_145cb053ba408304_p" crossorigin="anonymous" style="width:1px;height:1px;overflow:hidden;position:absolute;"></audio>
               <button class="orbPp" title="En Vivo" country="ve" alias="chronos" stream="1" autoplay="autoplay"></button>
               <a class="orbPt" href="https://onlineradiobox.com/ve/chronos/" target="_blank">
                 <img class="orbPti" src="https://cdn.onlineradiobox.com/img/l/1/140421.v2.png" alt="Chronos iRadio">
@@ -1073,7 +1148,7 @@
     </div>
 
     <script>
-        // ===== TEAM DATA =====
+// ===== TEAM DATA =====
         const teamData = [
             {
                 name: 'Km Rodriguez',
@@ -1114,12 +1189,41 @@
             return document.querySelectorAll('.team-card')[idx];
         }
 
+        function updateSiblings(idx) {
+            const prevIdx = (idx - 1 + teamData.length) % teamData.length;
+            const nextIdx = (idx + 1) % teamData.length;
+            const prev = teamData[prevIdx];
+            const next = teamData[nextIdx];
+
+            document.getElementById('siblingPrevImg').src = prev.img;
+            document.getElementById('siblingPrevImg').alt = prev.name;
+            document.getElementById('siblingPrevName').textContent = prev.name;
+            document.getElementById('siblingPrevRole').textContent = prev.role;
+
+            document.getElementById('siblingNextImg').src = next.img;
+            document.getElementById('siblingNextImg').alt = next.name;
+            document.getElementById('siblingNextName').textContent = next.name;
+            document.getElementById('siblingNextRole').textContent = next.role;
+
+            // Position siblings based on modal position
+            const vw = window.innerWidth;
+            const modalW = Math.min(700, vw * 0.9);
+            const sideSpace = (vw - modalW) / 2;
+            const siblingW = 240;
+            const prevEl = document.getElementById('siblingPrev');
+            const nextEl = document.getElementById('siblingNext');
+            // Center each sibling in the available side space
+            const offset = Math.max(10, (sideSpace - siblingW * 0.65) / 2);
+            prevEl.style.left = offset + 'px';
+            prevEl.style.right = '';
+            nextEl.style.right = offset + 'px';
+            nextEl.style.left = '';
+        }
+
         function openModal(idx) {
             activeCardIdx = idx;
             const m = teamData[idx];
-            const card = getCardEl(idx);
             const modal = document.getElementById('teamModal');
-            const modalCard = modal.querySelector('.modal-card');
 
             // Set content
             document.getElementById('modalImg').src = m.img;
@@ -1127,98 +1231,78 @@
             document.getElementById('modalName').textContent = m.name;
             document.getElementById('modalRole').textContent = m.role;
             document.getElementById('modalDesc').textContent = m.desc;
+            updateSiblings(idx);
 
-            // Get card position
-            const rect = card.getBoundingClientRect();
-            const cardCx = rect.left + rect.width / 2;
-            const cardCy = rect.top + rect.height / 2;
-
-            // Target: center of viewport
-            const vw = window.innerWidth;
-            const vh = window.innerHeight;
-            const modalW = Math.min(700, vw * 0.9);
-            const modalH = Math.min(vh * 0.85, 500);
-            const targetX = (vw - modalW) / 2;
-            const targetY = (vh - modalH) / 2;
-            const targetCx = vw / 2;
-            const targetCy = vh / 2;
-
-            // Start from card center, scaled down to card size
-            const scaleX = rect.width / modalW;
-            const scaleY = rect.height / modalH;
-            const startScale = Math.max(scaleX, scaleY);
-            const dx = cardCx - targetCx;
-            const dy = cardCy - targetCy;
-
-            // Set initial state (at card position)
-            modalCard.style.transition = 'none';
-            modalCard.style.left = targetX + 'px';
-            modalCard.style.top = targetY + 'px';
-            modalCard.style.width = modalW + 'px';
-            modalCard.style.maxHeight = modalH + 'px';
-            modalCard.style.transform = `translate(${dx}px, ${dy}px) scale(${startScale})`;
-            modalCard.style.borderRadius = card.style.borderRadius || '16px';
-            modalCard.style.opacity = '0';
-
-            // Activate backdrop
+            // Activate (CSS handles the animation)
             modal.classList.add('active');
-
-            // Animate to center
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    modalCard.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease, border-radius 0.4s ease';
-                    modalCard.style.transform = 'translate(0, 0) scale(1)';
-                    modalCard.style.borderRadius = '20px';
-                    modalCard.style.opacity = '1';
-                });
-            });
-
             document.body.style.overflow = 'hidden';
         }
 
         function closeModal(e) {
             if (e && e.target && !e.target.classList.contains('modal-backdrop') && e.type !== 'keydown') return;
+            if (e && e.target && e.target.closest && e.target.closest('.modal-sibling')) return;
             const modal = document.getElementById('teamModal');
-            const modalCard = modal.querySelector('.modal-card');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            activeCardIdx = null;
+        }
 
-            if (activeCardIdx !== null) {
-                const card = getCardEl(activeCardIdx);
-                const rect = card.getBoundingClientRect();
-                const cardCx = rect.left + rect.width / 2;
-                const cardCy = rect.top + rect.height / 2;
-                const vw = window.innerWidth;
-                const vh = window.innerHeight;
-                const targetCx = vw / 2;
-                const targetCy = vh / 2;
-                const modalW = modalCard.offsetWidth;
-                const modalH = modalCard.offsetHeight;
-                const scaleX = rect.width / modalW;
-                const scaleY = rect.height / modalH;
-                const startScale = Math.max(scaleX, scaleY);
-                const dx = cardCx - targetCx;
-                const dy = cardCy - targetCy;
+        function navigateModal(dir) {
+            if (activeCardIdx === null) return;
+            const newIdx = (activeCardIdx + dir + teamData.length) % teamData.length;
+            const m = teamData[newIdx];
+            activeCardIdx = newIdx;
 
-                // Animate back to card
-                modalCard.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, border-radius 0.3s ease';
-                modalCard.style.transform = `translate(${dx}px, ${dy}px) scale(${startScale})`;
-                modalCard.style.borderRadius = '16px';
-                modalCard.style.opacity = '0';
+            const modalCard = document.querySelector('#teamModal .modal-card');
+            const inner = modalCard.querySelector('.modal-img-wrap, .modal-body');
 
-                // Remove active after animation
-                setTimeout(() => {
-                    modal.classList.remove('active');
-                    modalCard.style.transition = 'none';
-                    document.body.style.overflow = '';
-                    activeCardIdx = null;
-                }, 400);
-            } else {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
-            }
+            // Slide content
+            const slideDir = dir > 0 ? 1 : -1;
+            const imgEl = document.getElementById('modalImg');
+            const nameEl = document.getElementById('modalName');
+            const roleEl = document.getElementById('modalRole');
+            const descEl = document.getElementById('modalDesc');
+
+            // Fade out
+            const els = [imgEl.parentElement, nameEl, roleEl, descEl];
+            els.forEach(el => {
+                el.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+                el.style.opacity = '0';
+                el.style.transform = `translateX(${slideDir * -20}px)`;
+            });
+
+            setTimeout(() => {
+                // Update content
+                imgEl.src = m.img;
+                imgEl.alt = m.name;
+                nameEl.textContent = m.name;
+                roleEl.textContent = m.role;
+                descEl.textContent = m.desc;
+                updateSiblings(newIdx);
+
+                // Set start position for fade in
+                els.forEach(el => {
+                    el.style.transition = 'none';
+                    el.style.transform = `translateX(${slideDir * 20}px)`;
+                });
+
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        els.forEach((el, i) => {
+                            el.style.transition = `opacity 0.25s ease ${i * 0.04}s, transform 0.25s ease ${i * 0.04}s`;
+                            el.style.opacity = '1';
+                            el.style.transform = 'translateX(0)';
+                        });
+                    });
+                });
+            }, 180);
         }
 
         document.addEventListener('keydown', (e) => {
+            if (activeCardIdx === null) return;
             if (e.key === 'Escape') closeModal(e);
+            if (e.key === 'ArrowLeft') navigateModal(-1);
+            if (e.key === 'ArrowRight') navigateModal(1);
         });
 
         // ===== NAVBAR SCROLL =====
