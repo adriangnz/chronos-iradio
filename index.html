@@ -553,7 +553,9 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
                 <span class="fsp-label">Reproduciendo ahora</span>
-                <span style="width:44px;" aria-hidden="true"></span>
+                <button type="button" id="installApp" class="fsp-install" onclick="installApp()" aria-label="Instalar como app" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                </button>
             </div>
 
             <div class="fsp-cover">
@@ -566,7 +568,12 @@
                     <span class="live-dot"></span>
                     <span id="fspStatusText">En directo</span>
                 </div>
-                <div class="fsp-track" id="fspTrack" aria-live="polite">Los clásicos de siempre</div>
+                <div class="fsp-track" id="fspTrack" aria-live="polite">
+                    <div class="fsp-track-inner">
+                        <span class="fsp-track-text" id="fspTrackText">Los clásicos de siempre</span>
+                        <span class="fsp-track-text" id="fspTrackText2" aria-hidden="true"></span>
+                    </div>
+                </div>
             </div>
 
             <div style="width:100%; display:flex; flex-direction:column; align-items:center;">

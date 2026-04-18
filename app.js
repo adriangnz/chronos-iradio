@@ -310,10 +310,12 @@ function openFullscreenPlayer() {
     fsp.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     syncFspUI();
-    // Polling periódico — los eventos del audio a veces no disparan de forma confiable
-    // en streams live, así que reforzamos con sync cada 500ms mientras esté abierto.
     if (fspSyncInterval) clearInterval(fspSyncInterval);
     fspSyncInterval = setInterval(syncFspUI, 500);
+    // Deep link en la URL
+    if (location.hash !== '#player') {
+        history.pushState({ fsp: true }, '', '#player');
+    }
 }
 
 function closeFullscreenPlayer() {
@@ -325,7 +327,32 @@ function closeFullscreenPlayer() {
     if (!document.querySelector('.modal-backdrop.active')) {
         document.body.style.overflow = '';
     }
+    // Limpiar hash si venimos de ahí (sin agregar al history)
+    if (location.hash === '#player') {
+        history.replaceState(null, '', location.pathname + location.search);
+    }
 }
+
+// Sync del fullscreen player con cambios de hash (navegación browser + deep link)
+window.addEventListener('hashchange', () => {
+    const fsp = document.getElementById('fullscreenPlayer');
+    if (!fsp) return;
+    const shouldBeOpen = location.hash === '#player';
+    const isOpen = fsp.classList.contains('active');
+    if (shouldBeOpen && !isOpen) openFullscreenPlayer();
+    else if (!shouldBeOpen && isOpen) {
+        fsp.classList.remove('active');
+        fsp.setAttribute('aria-hidden', 'true');
+        if (fspSyncInterval) { clearInterval(fspSyncInterval); fspSyncInterval = null; }
+        document.body.style.overflow = '';
+    }
+});
+// Estado inicial: si llega con #player en la URL, abrir al cargar
+document.addEventListener('DOMContentLoaded', () => {
+    if (location.hash === '#player') {
+        setTimeout(openFullscreenPlayer, 300);
+    }
+});
 
 function syncFspUI() {
     const fsp = document.getElementById('fullscreenPlayer');
@@ -344,14 +371,38 @@ function syncFspUI() {
         else statusText.textContent = 'En pausa';
     }
 
-    const track = document.getElementById('fspTrack');
-    if (track) {
-        const root = orbRoot();
-        const tt = root ? root.querySelector('.orbPtt') : null;
-        const text = tt ? (tt.textContent || '').trim() : '';
-        track.textContent = text || 'Los clásicos de siempre';
-    }
+    updateTrackText();
 }
+
+function updateTrackText() {
+    const track = document.getElementById('fspTrack');
+    const t1 = document.getElementById('fspTrackText');
+    const t2 = document.getElementById('fspTrackText2');
+    if (!track || !t1) return;
+    const root = orbRoot();
+    const tt = root ? root.querySelector('.orbPtt') : null;
+    const text = (tt ? (tt.textContent || '').trim() : '') || 'Los clásicos de siempre';
+    if (t1.textContent === text) {
+        // Mismo texto: solo re-evalúa scroll por si cambió el ancho
+        refreshMarquee();
+        return;
+    }
+    t1.textContent = text;
+    if (t2) t2.textContent = text;
+    // Defer al próximo frame para medir con el texto ya renderizado
+    requestAnimationFrame(refreshMarquee);
+}
+
+function refreshMarquee() {
+    const track = document.getElementById('fspTrack');
+    const inner = track ? track.querySelector('.fsp-track-inner') : null;
+    const t1 = document.getElementById('fspTrackText');
+    if (!track || !inner || !t1) return;
+    // Overflow = el texto es más ancho que el contenedor
+    const overflow = t1.scrollWidth > track.clientWidth - 24;
+    track.classList.toggle('scrolling', overflow);
+}
+window.addEventListener('resize', refreshMarquee);
 
 // Observa cambios del widget y del audio para sincronizar UI y flags internos.
 function attachOrbObservers() {
@@ -471,3 +522,33 @@ document.addEventListener('keydown', (e) => {
     const fsp = document.getElementById('fullscreenPlayer');
     if (fsp && fsp.classList.contains('active')) closeFullscreenPlayer();
 });
+
+// ===== PWA: Service Worker + install prompt =====
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+}
+
+let _deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    _deferredInstallPrompt = e;
+    const btn = document.getElementById('installApp');
+    if (btn) btn.hidden = false;
+});
+window.addEventListener('appinstalled', () => {
+    _deferredInstallPrompt = null;
+    const btn = document.getElementById('installApp');
+    if (btn) btn.hidden = true;
+});
+
+function installApp() {
+    if (!_deferredInstallPrompt) return;
+    _deferredInstallPrompt.prompt();
+    _deferredInstallPrompt.userChoice.finally(() => {
+        _deferredInstallPrompt = null;
+        const btn = document.getElementById('installApp');
+        if (btn) btn.hidden = true;
+    });
+}
