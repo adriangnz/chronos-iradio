@@ -156,12 +156,14 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ===== SWIPE EN EL MODAL DEL EQUIPO =====
-// Navega prev/next con gesto horizontal en touch devices.
+// - Horizontal: navega prev/next entre miembros
+// - Vertical: cierra el modal
 (function attachModalSwipe() {
     const modal = document.getElementById('teamModal');
     if (!modal) return;
     let startX = 0, startY = 0, tracking = false;
     const MIN_DX = 50;
+    const MIN_DY = 70;
 
     modal.addEventListener('touchstart', (e) => {
         if (!modal.classList.contains('active')) return;
@@ -177,9 +179,17 @@ document.addEventListener('keydown', (e) => {
         const t = e.changedTouches[0];
         const dx = t.clientX - startX;
         const dy = t.clientY - startY;
-        if (Math.abs(dx) < MIN_DX || Math.abs(dx) < Math.abs(dy)) return;
-        if (dx < 0) navigateModal(1);   // swipe izquierda → siguiente
-        else navigateModal(-1);          // swipe derecha → anterior
+        const absDx = Math.abs(dx), absDy = Math.abs(dy);
+        // Gesto predominantemente vertical → cerrar
+        if (absDy > absDx && absDy > MIN_DY) {
+            closeModal();
+            return;
+        }
+        // Gesto predominantemente horizontal → navegar
+        if (absDx >= MIN_DX && absDx > absDy) {
+            if (dx < 0) navigateModal(1);   // swipe izquierda → siguiente
+            else navigateModal(-1);          // swipe derecha → anterior
+        }
     }, { passive: true });
 
     modal.addEventListener('touchcancel', () => { tracking = false; }, { passive: true });
@@ -377,43 +387,45 @@ function waitForOrb() {
 waitForOrb();
 
 // ===== VOLUMEN =====
-// El widget OnlineRadioBox a veces ignora cambios directos a audio.volume.
-// Solución: insertamos un GainNode (Web Audio API) entre el <audio> y el
-// destino. Lazy init en la primera interacción del slider (requiere gesto
-// del usuario para resume del AudioContext). Fallback a audio.volume.
-let _audioCtx = null, _gainNode = null, _webAudioReady = false;
-
-function ensureWebAudio() {
-    if (_webAudioReady) return true;
-    const audio = orbAudio();
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!audio || !Ctx) return false;
-    try {
-        _audioCtx = new Ctx();
-        const src = _audioCtx.createMediaElementSource(audio);
-        _gainNode = _audioCtx.createGain();
-        _gainNode.gain.value = audio.volume || 0.8;
-        src.connect(_gainNode).connect(_audioCtx.destination);
-        _webAudioReady = true;
-        return true;
-    } catch (e) {
-        // Puede fallar si ya existe una MediaElementSource o por CORS
+// Web Audio API falla por CORS en el stream remoto (createMediaElementSource
+// dispara "AudioContext encountered an error" 60veces/seg). Usamos en su
+// lugar 3 rutas en paralelo y dejamos que gane la que funcione:
+//   1) audio.volume (funciona si el widget no tiene un gain propio).
+//   2) Simular click en el slider del widget (.orbVC) — lo que haría el usuario.
+//   3) audio.muted cuando v === 0 (garantiza al menos mute funcional).
+function setVolumeViaWidget(v) {
+    const root = orbRoot();
+    if (!root) return false;
+    const orbV = root.querySelector('.orbV');
+    const track = root.querySelector('.orbVC');
+    if (!orbV || !track) return false;
+    // Expandir el contenedor del slider temporalmente para tener ancho medible
+    const prevStyle = orbV.getAttribute('style') || '';
+    orbV.style.setProperty('width', '160px', 'important');
+    orbV.offsetWidth; // forzar reflow
+    const rect = track.getBoundingClientRect();
+    if (rect.width < 10) {
+        orbV.setAttribute('style', prevStyle);
         return false;
     }
+    const x = rect.left + rect.width * v;
+    const y = rect.top + rect.height / 2;
+    const opts = { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, view: window };
+    ['mousedown', 'mousemove', 'mouseup', 'click'].forEach(type => {
+        track.dispatchEvent(new MouseEvent(type, opts));
+    });
+    setTimeout(() => { orbV.setAttribute('style', prevStyle); }, 120);
+    return true;
 }
 
 function setVolume(v) {
     v = Math.max(0, Math.min(1, v));
-    if (ensureWebAudio() && _gainNode) {
-        _gainNode.gain.value = v;
-        if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume();
-    }
-    // Aplica también al audio element para mantener sincronía
     const audio = orbAudio();
     if (audio) {
         audio.volume = v;
         audio.muted = v === 0;
     }
+    setVolumeViaWidget(v);
 }
 
 const fspVol = document.getElementById('fspVolume');
@@ -421,10 +433,8 @@ if (fspVol) {
     fspVol.addEventListener('input', (e) => {
         setVolume(parseFloat(e.target.value) / 100);
     });
-    // Resume el AudioContext en pointer down (el browser exige interacción)
-    fspVol.addEventListener('pointerdown', () => {
-        ensureWebAudio();
-        if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume();
+    fspVol.addEventListener('change', (e) => {
+        setVolume(parseFloat(e.target.value) / 100);
     });
 }
 
