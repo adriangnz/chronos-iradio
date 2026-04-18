@@ -87,6 +87,29 @@ Si tu firewall local está activo (`ufw`), abre el puerto en LAN:
 sudo ufw allow from 192.168.0.0/16 to any port 8080
 ```
 
+## Deploy a GitHub Pages
+
+Hay un workflow en `.github/workflows/deploy.yml` que publica el sitio automáticamente en cada push a `master`.
+
+### Activación (una sola vez)
+
+1. Push del repo a GitHub: `git remote add origin git@github.com:<usuario>/<repo>.git && git push -u origin master --tags`
+2. En el repo en GitHub → **Settings → Pages**.
+3. En **Build and deployment → Source**, elige **GitHub Actions** (no "Deploy from a branch").
+4. El próximo push a `master` (o un `workflow_dispatch` manual desde la pestaña Actions) dispara el deploy.
+
+La URL final aparece como output del job y en Settings → Pages una vez completado el primer deploy (normalmente `https://<usuario>.github.io/<repo>/`).
+
+### Qué sube el workflow
+
+El step **Prepare artifact directory** copia la raíz del repo a `_site/` excluyendo archivos que no deben servirse públicamente: `.git`, `.github`, `CLAUDE.md`, `CHANGELOG.md`, `Caddyfile`, `.claude`. Añade un `.nojekyll` para que Pages no intente procesar el sitio con Jekyll.
+
+### Notas
+
+- Las rutas del sitio son **relativas** (`styles.css`, `assets/...`) para que funcione tanto en user page (`usuario.github.io`) como en project page (`usuario.github.io/repo/`).
+- Los canonical URLs y OG tags apuntan a `chronosiradio.online`. Si quieres que Google indexe la versión de GitHub Pages en vez del dominio principal, tendrás que editar `<link rel="canonical">`, `og:url` y el sitemap.
+- GitHub Pages no soporta los security headers del `Caddyfile`. Para el deploy GH Pages sirve los headers por defecto; si necesitas CSP/HSTS custom, considera Cloudflare Pages o ponerle un Cloudflare proxy delante.
+
 ## Desarrollo
 
 ### Convenciones

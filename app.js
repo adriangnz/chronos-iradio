@@ -3,31 +3,31 @@ const teamData = [
     {
         name: 'Km Rodriguez',
         role: 'Creador & Director',
-        img: '/assets/team/km-rodriguez.webp',
+        img: 'assets/team/km-rodriguez.webp',
         desc: 'Creador de Chronos iRadio. Un sueno de su adolescencia, que comienza a hacerse realidad con esta aventura. Su vision y pasion por la radio lo llevaron a construir este proyecto desde cero.'
     },
     {
         name: 'Eryx Rodriguez',
         role: 'Produccion & Locutor',
-        img: '/assets/team/eryx-rodriguez.webp',
+        img: 'assets/team/eryx-rodriguez.webp',
         desc: 'A pesar de su corta edad, es un amante y conocedor de la buena musica. Esta en la asistencia de produccion y en la conduccion del microprograma Chronos iCom.'
     },
     {
         name: 'Enrique Gonzalez',
         role: 'Voz & Imagen',
-        img: '/assets/team/enrique-gonzalez.webp',
+        img: 'assets/team/enrique-gonzalez.webp',
         desc: 'Nuestra voz marca, con un talento increible es el que le imprime la personalidad y la imagen a Chronos iRadio. Ademas complice en esta aventura que conduce a un sueno.'
     },
     {
         name: 'Franmary Fernandez',
         role: 'Locutora',
-        img: '/assets/team/franmary-fernandez.webp',
+        img: 'assets/team/franmary-fernandez.webp',
         desc: 'Una de las voces que escuchas en Chronos iRadio. Una voz calida sobria con unos matices grandiosos. Licenciada en Comunicacion Social.'
     },
     {
         name: 'Victor Grinfelds',
         role: 'Ingeniero',
-        img: '/assets/team/victor-grinfelds.webp',
+        img: 'assets/team/victor-grinfelds.webp',
         desc: 'Nuestro Ingeniero colaborador principal de Chronos iRadio. El es una de las personas que creen en este proyecto y aporta su mejor esfuerzo en la construccion de esta aventura.'
     }
 ];
