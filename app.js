@@ -243,16 +243,26 @@ function orbPlayButton() {
     if (!root) return null;
     return root.querySelector('.orbPp, .orbPs');
 }
+// Detección multi-señal: el widget a veces tarda en cambiar la clase del botón,
+// a veces audio.paused no refleja la realidad. Priorizamos el flag actualizado
+// por los eventos del <audio> y cruzamos con señales DOM.
+let _audioIsPlaying = false;
+let _audioIsLoading = false;
+
 function isPlaying() {
+    if (_audioIsPlaying) return true;
     const a = orbAudio();
-    if (!a) return false;
-    return !a.paused && !a.ended;
+    if (a && !a.paused && !a.ended && a.readyState >= 2) return true;
+    const btn = orbPlayButton();
+    if (btn && btn.classList.contains('orbPs')) return true;
+    return false;
 }
 function isLoading() {
+    if (_audioIsLoading) return true;
     const a = orbAudio();
     if (!a) return false;
-    // Cargando = no pausado pero aún sin datos suficientes, o buscando
-    return !a.paused && (a.readyState < 3 || a.seeking || a.networkState === 2);
+    // El usuario apretó play pero aún no hay datos suficientes
+    return !a.paused && a.readyState < 2;
 }
 
 const PLAY_ICON = '<polygon points="7 4 20 12 7 20 7 4"/>';
@@ -272,12 +282,12 @@ function togglePlay() {
 
 function playAndExpand() {
     openFullscreenPlayer();
-    // Sólo disparar play si el widget está en idle (botón muestra .orbPp).
-    // Cuando está sonando, el widget intercambia la clase a .orbPs y un click
-    // haría stop — por eso no basta con chequear audio.paused.
+    // Sólo disparar play si el stream NO está sonando actualmente.
+    // Usa isPlaying() (multi-señal) para ser robusto.
     setTimeout(() => {
+        if (isPlaying()) return;
         const btn = orbPlayButton();
-        if (btn && btn.classList.contains('orbPp')) btn.click();
+        if (btn) btn.click();
     }, 150);
 }
 
@@ -333,7 +343,7 @@ function syncFspUI() {
     }
 }
 
-// Observa cambios del widget y del audio para sincronizar UI
+// Observa cambios del widget y del audio para sincronizar UI y flags internos.
 function attachOrbObservers() {
     const root = orbRoot();
     if (root) {
@@ -342,10 +352,13 @@ function attachOrbObservers() {
     }
     const audio = orbAudio();
     if (audio) {
-        ['play', 'pause', 'playing', 'waiting', 'ended', 'error', 'volumechange'].forEach(ev => {
-            audio.addEventListener(ev, syncFspUI);
-        });
-        // Inicializar volumen UI desde el audio
+        audio.addEventListener('play',    () => { _audioIsLoading = true;  syncFspUI(); });
+        audio.addEventListener('waiting', () => { _audioIsLoading = true;  syncFspUI(); });
+        audio.addEventListener('playing', () => { _audioIsPlaying = true;  _audioIsLoading = false; syncFspUI(); });
+        audio.addEventListener('pause',   () => { _audioIsPlaying = false; _audioIsLoading = false; syncFspUI(); });
+        audio.addEventListener('ended',   () => { _audioIsPlaying = false; _audioIsLoading = false; syncFspUI(); });
+        audio.addEventListener('error',   () => { _audioIsPlaying = false; _audioIsLoading = false; syncFspUI(); });
+        audio.addEventListener('volumechange', syncFspUI);
         const volEl = document.getElementById('fspVolume');
         if (volEl) volEl.value = Math.round((audio.volume || 0.8) * 100);
     }
@@ -363,23 +376,43 @@ function waitForOrb() {
 }
 waitForOrb();
 
-// Volumen: aplica al <audio> y sincroniza con el slider del widget para que el
-// widget no sobrescriba nuestro cambio en su próximo render.
+// ===== VOLUMEN =====
+// El widget OnlineRadioBox a veces ignora cambios directos a audio.volume.
+// Solución: insertamos un GainNode (Web Audio API) entre el <audio> y el
+// destino. Lazy init en la primera interacción del slider (requiere gesto
+// del usuario para resume del AudioContext). Fallback a audio.volume.
+let _audioCtx = null, _gainNode = null, _webAudioReady = false;
+
+function ensureWebAudio() {
+    if (_webAudioReady) return true;
+    const audio = orbAudio();
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!audio || !Ctx) return false;
+    try {
+        _audioCtx = new Ctx();
+        const src = _audioCtx.createMediaElementSource(audio);
+        _gainNode = _audioCtx.createGain();
+        _gainNode.gain.value = audio.volume || 0.8;
+        src.connect(_gainNode).connect(_audioCtx.destination);
+        _webAudioReady = true;
+        return true;
+    } catch (e) {
+        // Puede fallar si ya existe una MediaElementSource o por CORS
+        return false;
+    }
+}
+
 function setVolume(v) {
     v = Math.max(0, Math.min(1, v));
+    if (ensureWebAudio() && _gainNode) {
+        _gainNode.gain.value = v;
+        if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume();
+    }
+    // Aplica también al audio element para mantener sincronía
     const audio = orbAudio();
     if (audio) {
         audio.volume = v;
         audio.muted = v === 0;
-    }
-    // También mover el thumb del slider interno del widget (.orbVCs)
-    const root = orbRoot();
-    if (root) {
-        const cs = root.querySelector('.orbVCs');
-        if (cs) {
-            // El widget posiciona el thumb con inset-left dinámico (0..100%)
-            cs.style.left = Math.round(v * 100) + '%';
-        }
     }
 }
 
@@ -387,6 +420,11 @@ const fspVol = document.getElementById('fspVolume');
 if (fspVol) {
     fspVol.addEventListener('input', (e) => {
         setVolume(parseFloat(e.target.value) / 100);
+    });
+    // Resume el AudioContext en pointer down (el browser exige interacción)
+    fspVol.addEventListener('pointerdown', () => {
+        ensureWebAudio();
+        if (_audioCtx && _audioCtx.state === 'suspended') _audioCtx.resume();
     });
 }
 

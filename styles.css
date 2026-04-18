@@ -570,12 +570,22 @@ section { position: relative; z-index: 1; padding: 80px 0; }
     border-color: var(--accent-blue) !important;
 }
 
-/* Oculta el branding ORB del widget — evita solape con el botón expandir
-   y está duplicado con el link "Ver programación" del fullscreen player */
-.player-bar .orbPh { display: none !important; }
+/* Oculta el branding ORB del widget (duplicado con link del fullscreen player) */
+.player-bar .orbPh,
+.player-bar .orbPh * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+}
 
-/* Dale espacio al chevron expandir a la derecha */
-.player-bar .orbPhc { padding-right: 58px !important; }
+/* Dale espacio al chevron expandir a la izquierda */
+.player-bar .orbPhc { padding-left: 62px !important; }
+@media (max-width: 768px) {
+    .player-bar .orbPhc { padding-left: 58px !important; }
+}
 
 /* ===== SITE FOOTER ===== */
 .site-footer { text-align: center; padding: 40px 20px 20px; color: var(--text-secondary); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.06); }
@@ -624,8 +634,6 @@ section { position: relative; z-index: 1; padding: 80px 0; }
     .player-bar .orbPtn { font-size: 14px !important; }
     .player-bar .orbPtt { font-size: 11px !important; }
     .player-bar .orbV { right: 8px !important; }
-    /* Padding extra al container del widget para dejar espacio al botón expandir */
-    .player-bar .orbPhc { padding: 10px 54px 10px 10px !important; }
 }
 
 @media (max-width: 480px) {
@@ -633,17 +641,19 @@ section { position: relative; z-index: 1; padding: 80px 0; }
     .team-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ===== PLAYER BAR: botón expandir ===== */
+/* ===== PLAYER BAR: botón expandir =====
+   Posicionado a la izquierda, fuera del widget, para evitar colisión con
+   los controles internos del widget (volumen, branding ORB, etc.). */
 .player-expand {
     position: absolute;
-    right: 12px;
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
     width: 36px;
     height: 36px;
     border-radius: 50%;
     background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
     color: var(--text-secondary);
     display: flex;
     align-items: center;
@@ -656,11 +666,11 @@ section { position: relative; z-index: 1; padding: 80px 0; }
     background: rgba(59,130,246,0.18);
     border-color: rgba(59,130,246,0.4);
     color: var(--text-primary);
-    transform: translateY(-50%) scale(1.05);
+    transform: translateY(-50%) scale(1.08);
 }
 .player-expand svg { width: 18px; height: 18px; }
 @media (max-width: 768px) {
-    .player-expand { width: 40px; height: 40px; right: 10px; }
+    .player-expand { width: 40px; height: 40px; left: 8px; }
     .player-expand svg { width: 20px; height: 20px; }
 }
 
