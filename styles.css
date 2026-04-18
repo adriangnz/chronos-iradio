@@ -570,9 +570,12 @@ section { position: relative; z-index: 1; padding: 80px 0; }
     border-color: var(--accent-blue) !important;
 }
 
-.player-bar .orbPh > img {
-    opacity: 0.4 !important;
-}
+/* Oculta el branding ORB del widget — evita solape con el botón expandir
+   y está duplicado con el link "Ver programación" del fullscreen player */
+.player-bar .orbPh { display: none !important; }
+
+/* Dale espacio al chevron expandir a la derecha */
+.player-bar .orbPhc { padding-right: 58px !important; }
 
 /* ===== SITE FOOTER ===== */
 .site-footer { text-align: center; padding: 40px 20px 20px; color: var(--text-secondary); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.06); }
@@ -620,10 +623,9 @@ section { position: relative; z-index: 1; padding: 80px 0; }
     .player-bar { padding: 2px 0; }
     .player-bar .orbPtn { font-size: 14px !important; }
     .player-bar .orbPtt { font-size: 11px !important; }
-    .player-bar .orbPh { display: none !important; } /* quita icono ORB branding */
     .player-bar .orbV { right: 8px !important; }
     /* Padding extra al container del widget para dejar espacio al botón expandir */
-    .player-bar .orbPhc { padding: 10px 48px 10px 10px !important; }
+    .player-bar .orbPhc { padding: 10px 54px 10px 10px !important; }
 }
 
 @media (max-width: 480px) {
