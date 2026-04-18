@@ -853,25 +853,43 @@ section { position: relative; z-index: 1; padding: 80px 0; }
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 22px;
     width: 100%;
-    max-width: 320px;
+    max-width: 340px;
     margin-top: 24px;
     padding-bottom: 12px;
 }
 
-.fsp-ctrl {
-    width: 56px;
-    height: 56px;
+.fsp-ctrl-side {
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     background: rgba(255,255,255,0.06);
-    color: var(--text-primary);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
+    text-decoration: none;
     transition: var(--transition);
 }
-.fsp-ctrl:hover { background: rgba(255,255,255,0.12); transform: scale(1.05); }
-.fsp-ctrl svg { width: 24px; height: 24px; }
+.fsp-ctrl-side:hover,
+.fsp-ctrl-side:focus-visible {
+    background: rgba(255,255,255,0.12);
+    color: var(--text-primary);
+    transform: scale(1.05);
+}
+.fsp-ctrl-side svg { width: 22px; height: 22px; }
+.fsp-ctrl-side.muted {
+    background: rgba(239,68,68,0.18);
+    border-color: rgba(239,68,68,0.4);
+    color: #ef4444;
+}
+.fsp-ctrl-side.fsp-ctrl-whatsapp:hover {
+    background: rgba(37,211,102,0.18);
+    border-color: rgba(37,211,102,0.45);
+    color: #25d366;
+}
 
 .fsp-play {
     width: 84px;
