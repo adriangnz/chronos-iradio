@@ -195,3 +195,154 @@ window.addEventListener('scroll', () => {
         if (link) link.classList.toggle('active', scrollY >= top && scrollY < top + height);
     });
 });
+
+// ===== FULLSCREEN PLAYER + ORB WIDGET BRIDGE =====
+// Puentea los controles del widget OnlineRadioBox a nuestra UI propia.
+// El widget vive dentro de #orb_player_145cb053ba408304 y expone:
+//   - .orbPp (play) / .orbPs (stop) — el widget intercambia la clase según el estado
+//   - #orb_player_145cb053ba408304_p — elemento <audio> real con el stream
+//   - .orbPtt — texto del track actual (actualizado por el widget)
+
+const ORB_ROOT_ID = 'orb_player_145cb053ba408304';
+const ORB_AUDIO_ID = 'orb_player_145cb053ba408304_p';
+
+function orbRoot() { return document.getElementById(ORB_ROOT_ID); }
+function orbAudio() { return document.getElementById(ORB_AUDIO_ID); }
+function orbPlayButton() {
+    const root = orbRoot();
+    if (!root) return null;
+    return root.querySelector('.orbPp, .orbPs');
+}
+function isPlaying() {
+    const a = orbAudio();
+    if (!a) return false;
+    return !a.paused && !a.ended && a.readyState > 2;
+}
+
+const PLAY_ICON = '<polygon points="7 4 20 12 7 20 7 4"/>';
+const PAUSE_ICON = '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>';
+
+function renderPlayIcon(playing) {
+    const iconEl = document.getElementById('fspPlayIcon');
+    if (!iconEl) return;
+    iconEl.innerHTML = playing ? PAUSE_ICON : PLAY_ICON;
+    iconEl.setAttribute('fill', 'currentColor');
+}
+
+function togglePlay() {
+    const btn = orbPlayButton();
+    if (btn) btn.click();
+}
+
+function playAndExpand() {
+    openFullscreenPlayer();
+    // Si no está sonando, disparar play. Si ya suena, solo expandir.
+    setTimeout(() => {
+        if (!isPlaying()) {
+            const btn = orbPlayButton();
+            if (btn) btn.click();
+        }
+    }, 150);
+}
+
+function openFullscreenPlayer() {
+    const fsp = document.getElementById('fullscreenPlayer');
+    if (!fsp) return;
+    fsp.classList.add('active');
+    fsp.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    syncFspUI();
+}
+
+function closeFullscreenPlayer() {
+    const fsp = document.getElementById('fullscreenPlayer');
+    if (!fsp) return;
+    fsp.classList.remove('active');
+    fsp.setAttribute('aria-hidden', 'true');
+    // Solo restaurar overflow si no hay otro modal abierto
+    if (!document.querySelector('.modal-backdrop.active')) {
+        document.body.style.overflow = '';
+    }
+}
+
+function syncFspUI() {
+    const fsp = document.getElementById('fullscreenPlayer');
+    if (!fsp) return;
+    const audio = orbAudio();
+    const playing = isPlaying();
+    const loading = audio && !audio.paused && audio.readyState <= 2;
+    fsp.classList.toggle('playing', playing);
+    fsp.classList.toggle('loading', !!loading && !playing);
+    renderPlayIcon(playing);
+
+    const statusText = document.getElementById('fspStatusText');
+    if (statusText) {
+        if (loading) statusText.textContent = 'Cargando…';
+        else if (playing) statusText.textContent = 'En directo';
+        else statusText.textContent = 'Pausado';
+    }
+
+    const track = document.getElementById('fspTrack');
+    if (track) {
+        const root = orbRoot();
+        const tt = root ? root.querySelector('.orbPtt') : null;
+        const text = tt ? (tt.textContent || '').trim() : '';
+        track.textContent = text || 'Los clásicos de siempre';
+    }
+}
+
+// Observa cambios del widget y del audio para sincronizar UI
+function attachOrbObservers() {
+    const root = orbRoot();
+    if (root) {
+        const mo = new MutationObserver(syncFspUI);
+        mo.observe(root, { childList: true, subtree: true, attributes: true, characterData: true });
+    }
+    const audio = orbAudio();
+    if (audio) {
+        ['play', 'pause', 'playing', 'waiting', 'ended', 'error', 'volumechange'].forEach(ev => {
+            audio.addEventListener(ev, syncFspUI);
+        });
+        // Inicializar volumen UI desde el audio
+        const volEl = document.getElementById('fspVolume');
+        if (volEl) volEl.value = Math.round((audio.volume || 0.8) * 100);
+    }
+}
+
+// Retry porque el widget carga asíncronamente
+let orbAttempts = 0;
+function waitForOrb() {
+    if (orbAudio() && orbRoot()) {
+        attachOrbObservers();
+        syncFspUI();
+        return;
+    }
+    if (orbAttempts++ < 40) setTimeout(waitForOrb, 250);
+}
+waitForOrb();
+
+// Volumen slider
+const fspVol = document.getElementById('fspVolume');
+if (fspVol) {
+    fspVol.addEventListener('input', (e) => {
+        const audio = orbAudio();
+        if (audio) audio.volume = parseFloat(e.target.value) / 100;
+    });
+}
+
+// Tap en el título del widget (.orbPt) → abrir fullscreen en lugar de navegar a OnlineRadioBox
+document.addEventListener('click', (e) => {
+    const link = e.target.closest ? e.target.closest('.player-bar .orbPt') : null;
+    if (link) {
+        e.preventDefault();
+        e.stopPropagation();
+        openFullscreenPlayer();
+    }
+}, true);
+
+// ESC cierra el fullscreen player
+document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const fsp = document.getElementById('fullscreenPlayer');
+    if (fsp && fsp.classList.contains('active')) closeFullscreenPlayer();
+});

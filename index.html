@@ -142,10 +142,10 @@
                 <li><a href="#equipo">Equipo</a></li>
                 <li><a href="#contacto">Contacto</a></li>
             </ul>
-            <a href="#playerBar" class="nav-live-badge">
+            <button type="button" class="nav-live-badge" onclick="playAndExpand()" aria-label="Escuchar en vivo y abrir reproductor">
                 <span class="live-dot"></span>
                 EN VIVO
-            </a>
+            </button>
             <button class="menu-toggle" onclick="toggleMobileNav()" aria-label="Abrir menu de navegacion" aria-expanded="false" id="menuToggle">
                 <span></span><span></span><span></span>
             </button>
@@ -176,10 +176,10 @@
             <h1><span>Chronos iRadio</span></h1>
             <p>Los clasicos de la musica de todos los tiempos. Rock, pop, soul, jazz y musica latina de los ultimos 50 anos, desde Venezuela para el mundo.</p>
             <div class="hero-actions">
-                <a href="#playerBar" class="btn btn-primary">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <button type="button" class="btn btn-primary" onclick="playAndExpand()" aria-label="Escuchar Chronos iRadio en vivo y abrir reproductor">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                     Escuchar en Vivo
-                </a>
+                </button>
                 <a href="#programas" class="btn btn-secondary">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     Ver Programas
@@ -430,7 +430,11 @@
 
     <!-- Fixed Player Bar -->
     <div class="player-bar" id="playerBar">
-        <div class="player-bar-inner">
+        <div class="player-bar-inner" style="position:relative;">
+
+            <button type="button" class="player-expand" onclick="openFullscreenPlayer()" aria-label="Abrir reproductor en pantalla completa">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
 
 <!--OnlineRadioBox Player widget-->
             <div class="orbP" id="orb_player_145cb053ba408304" vlm="0.8">
@@ -537,6 +541,53 @@
             </script>
             </div>
             <!--OnlineRadioBox Player widget-->
+        </div>
+    </div>
+
+    <!-- Fullscreen Player -->
+    <div class="fsp" id="fullscreenPlayer" role="dialog" aria-modal="true" aria-label="Reproductor en pantalla completa" aria-hidden="true">
+        <div class="fsp-backdrop" onclick="closeFullscreenPlayer()"></div>
+        <div class="fsp-content">
+            <div class="fsp-top">
+                <button type="button" class="fsp-close" onclick="closeFullscreenPlayer()" aria-label="Cerrar reproductor">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <span class="fsp-label">Reproduciendo ahora</span>
+                <span style="width:44px;" aria-hidden="true"></span>
+            </div>
+
+            <div class="fsp-cover">
+                <img src="assets/logo/chronos-192.jpg" alt="Chronos iRadio" width="192" height="192">
+            </div>
+
+            <div class="fsp-info">
+                <h2>Chronos iRadio</h2>
+                <div class="fsp-status" id="fspStatus">
+                    <span class="live-dot"></span>
+                    <span id="fspStatusText">En directo</span>
+                </div>
+                <div class="fsp-track" id="fspTrack" aria-live="polite">Los clásicos de siempre</div>
+            </div>
+
+            <div style="width:100%; display:flex; flex-direction:column; align-items:center;">
+                <div class="fsp-controls">
+                    <a class="fsp-ctrl" href="https://onlineradiobox.com/ve/chronos/" target="_blank" rel="noopener" aria-label="Ver programación en Online Radio Box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="4" x2="8" y2="2"/><line x1="16" y1="4" x2="16" y2="2"/></svg>
+                    </a>
+                    <button type="button" class="fsp-play" id="fspPlay" onclick="togglePlay()" aria-label="Reproducir o pausar">
+                        <svg id="fspPlayIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="7 4 20 12 7 20 7 4"/></svg>
+                    </button>
+                    <a class="fsp-ctrl" href="#contacto" onclick="closeFullscreenPlayer()" aria-label="Ir a contacto">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </a>
+                </div>
+
+                <div class="fsp-volume-wrap">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg>
+                    <input type="range" class="fsp-volume" id="fspVolume" min="0" max="100" value="80" aria-label="Volumen">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </div>
+            </div>
         </div>
     </div>
 
