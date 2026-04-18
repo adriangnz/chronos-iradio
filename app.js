@@ -272,12 +272,12 @@ function togglePlay() {
 
 function playAndExpand() {
     openFullscreenPlayer();
-    // Si no está sonando, disparar play. Si ya suena, solo expandir.
+    // Sólo disparar play si el widget está en idle (botón muestra .orbPp).
+    // Cuando está sonando, el widget intercambia la clase a .orbPs y un click
+    // haría stop — por eso no basta con chequear audio.paused.
     setTimeout(() => {
-        if (!isPlaying()) {
-            const btn = orbPlayButton();
-            if (btn) btn.click();
-        }
+        const btn = orbPlayButton();
+        if (btn && btn.classList.contains('orbPp')) btn.click();
     }, 150);
 }
 
