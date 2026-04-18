@@ -155,6 +155,36 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') navigateModal(1);
 });
 
+// ===== SWIPE EN EL MODAL DEL EQUIPO =====
+// Navega prev/next con gesto horizontal en touch devices.
+(function attachModalSwipe() {
+    const modal = document.getElementById('teamModal');
+    if (!modal) return;
+    let startX = 0, startY = 0, tracking = false;
+    const MIN_DX = 50;
+
+    modal.addEventListener('touchstart', (e) => {
+        if (!modal.classList.contains('active')) return;
+        const t = e.touches[0];
+        startX = t.clientX;
+        startY = t.clientY;
+        tracking = true;
+    }, { passive: true });
+
+    modal.addEventListener('touchend', (e) => {
+        if (!tracking || !modal.classList.contains('active')) return;
+        tracking = false;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        if (Math.abs(dx) < MIN_DX || Math.abs(dx) < Math.abs(dy)) return;
+        if (dx < 0) navigateModal(1);   // swipe izquierda → siguiente
+        else navigateModal(-1);          // swipe derecha → anterior
+    }, { passive: true });
+
+    modal.addEventListener('touchcancel', () => { tracking = false; }, { passive: true });
+})();
+
 // ===== DYNAMIC YEAR =====
 var _y = document.getElementById('year');
 if (_y) _y.textContent = new Date().getFullYear();
@@ -216,7 +246,13 @@ function orbPlayButton() {
 function isPlaying() {
     const a = orbAudio();
     if (!a) return false;
-    return !a.paused && !a.ended && a.readyState > 2;
+    return !a.paused && !a.ended;
+}
+function isLoading() {
+    const a = orbAudio();
+    if (!a) return false;
+    // Cargando = no pausado pero aún sin datos suficientes, o buscando
+    return !a.paused && (a.readyState < 3 || a.seeking || a.networkState === 2);
 }
 
 const PLAY_ICON = '<polygon points="7 4 20 12 7 20 7 4"/>';
@@ -245,6 +281,8 @@ function playAndExpand() {
     }, 150);
 }
 
+let fspSyncInterval = null;
+
 function openFullscreenPlayer() {
     const fsp = document.getElementById('fullscreenPlayer');
     if (!fsp) return;
@@ -252,6 +290,10 @@ function openFullscreenPlayer() {
     fsp.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     syncFspUI();
+    // Polling periódico — los eventos del audio a veces no disparan de forma confiable
+    // en streams live, así que reforzamos con sync cada 500ms mientras esté abierto.
+    if (fspSyncInterval) clearInterval(fspSyncInterval);
+    fspSyncInterval = setInterval(syncFspUI, 500);
 }
 
 function closeFullscreenPlayer() {
@@ -259,7 +301,7 @@ function closeFullscreenPlayer() {
     if (!fsp) return;
     fsp.classList.remove('active');
     fsp.setAttribute('aria-hidden', 'true');
-    // Solo restaurar overflow si no hay otro modal abierto
+    if (fspSyncInterval) { clearInterval(fspSyncInterval); fspSyncInterval = null; }
     if (!document.querySelector('.modal-backdrop.active')) {
         document.body.style.overflow = '';
     }
@@ -268,18 +310,18 @@ function closeFullscreenPlayer() {
 function syncFspUI() {
     const fsp = document.getElementById('fullscreenPlayer');
     if (!fsp) return;
-    const audio = orbAudio();
     const playing = isPlaying();
-    const loading = audio && !audio.paused && audio.readyState <= 2;
-    fsp.classList.toggle('playing', playing);
-    fsp.classList.toggle('loading', !!loading && !playing);
+    const loading = isLoading();
+    fsp.classList.toggle('playing', playing && !loading);
+    fsp.classList.toggle('loading', loading);
+    fsp.classList.toggle('paused', !playing && !loading);
     renderPlayIcon(playing);
 
     const statusText = document.getElementById('fspStatusText');
     if (statusText) {
-        if (loading) statusText.textContent = 'Cargando…';
+        if (loading) statusText.textContent = 'Cargando';
         else if (playing) statusText.textContent = 'En directo';
-        else statusText.textContent = 'Pausado';
+        else statusText.textContent = 'En pausa';
     }
 
     const track = document.getElementById('fspTrack');
@@ -321,14 +363,49 @@ function waitForOrb() {
 }
 waitForOrb();
 
-// Volumen slider
+// Volumen: aplica al <audio> y sincroniza con el slider del widget para que el
+// widget no sobrescriba nuestro cambio en su próximo render.
+function setVolume(v) {
+    v = Math.max(0, Math.min(1, v));
+    const audio = orbAudio();
+    if (audio) {
+        audio.volume = v;
+        audio.muted = v === 0;
+    }
+    // También mover el thumb del slider interno del widget (.orbVCs)
+    const root = orbRoot();
+    if (root) {
+        const cs = root.querySelector('.orbVCs');
+        if (cs) {
+            // El widget posiciona el thumb con inset-left dinámico (0..100%)
+            cs.style.left = Math.round(v * 100) + '%';
+        }
+    }
+}
+
 const fspVol = document.getElementById('fspVolume');
 if (fspVol) {
     fspVol.addEventListener('input', (e) => {
-        const audio = orbAudio();
-        if (audio) audio.volume = parseFloat(e.target.value) / 100;
+        setVolume(parseFloat(e.target.value) / 100);
     });
 }
+
+// Elimina el branding ORB del DOM (el CSS display:none es sobrescrito por el
+// widget vía estilos inline después de cargar, así que removemos el nodo).
+function killOrbBranding() {
+    const root = orbRoot();
+    if (!root) return false;
+    const brand = root.querySelector('.orbPh');
+    if (brand) { brand.remove(); return true; }
+    return false;
+}
+let killAttempts = 0;
+(function waitKillBranding() {
+    if (killOrbBranding() || killAttempts++ > 40) return;
+    setTimeout(waitKillBranding, 250);
+})();
+// Re-kill periódicamente por si el widget lo restaura
+setInterval(killOrbBranding, 2000);
 
 // Tap en el título del widget (.orbPt) → abrir fullscreen en lugar de navegar a OnlineRadioBox
 document.addEventListener('click', (e) => {

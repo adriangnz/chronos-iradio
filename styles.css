@@ -776,18 +776,22 @@ section { position: relative; z-index: 1; padding: 80px 0; }
     gap: 8px;
     padding: 5px 14px;
     border-radius: 100px;
-    background: rgba(239,68,68,0.14);
-    border: 1px solid rgba(239,68,68,0.3);
     font-size: 0.78rem;
     font-weight: 600;
-    color: #ef4444;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: 14px;
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    /* Default: en directo (rojo) */
+    background: rgba(239,68,68,0.14);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #ef4444;
 }
-.fsp-status .live-dot { width: 7px; height: 7px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
+.fsp-status .live-dot { width: 7px; height: 7px; background: currentColor; border-radius: 50%; }
+.fsp.playing .fsp-status .live-dot { animation: pulse 1.5s ease-in-out infinite; }
 .fsp.loading .fsp-status { background: rgba(59,130,246,0.14); border-color: rgba(59,130,246,0.3); color: var(--accent-blue); }
-.fsp.loading .fsp-status .live-dot { background: var(--accent-blue); }
+.fsp.loading .fsp-status .live-dot { animation: pulse 0.8s ease-in-out infinite; }
+.fsp.paused .fsp-status { background: rgba(160,160,184,0.12); border-color: rgba(160,160,184,0.25); color: var(--text-secondary); }
 
 .fsp-track {
     font-size: 0.95rem;
@@ -804,7 +808,7 @@ section { position: relative; z-index: 1; padding: 80px 0; }
 .fsp-controls {
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
     width: 100%;
     max-width: 320px;
     margin-top: 24px;
