@@ -201,9 +201,11 @@ if (_y) _y.textContent = new Date().getFullYear();
 
 // ===== NAVBAR SCROLL =====
 const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 50);
-});
+if (navbar) {
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+}
 
 // ===== MOBILE NAV =====
 function toggleMobileNav() {
@@ -425,6 +427,9 @@ function syncFspUI() {
     updateTrackText();
     updateMuteIcon();
     syncCoverFromWidget();
+    if ('mediaSession' in navigator) {
+        try { navigator.mediaSession.playbackState = playing ? 'playing' : 'paused'; } catch (e) {}
+    }
 }
 
 // Cover del fullscreen player: el widget ORB hace fetch/XHR a su endpoint de
@@ -438,6 +443,9 @@ function upgradeImgResolution(url) {
     // CDN Apple Music (mzstatic.com) expone múltiples tamaños en la URL
     return url.replace(/\/(\d+)x(\d+)bb\.(jpg|jpeg|png|webp)/i, '/600x600bb.$3');
 }
+
+let _trackArtist = null;
+let _trackName = null;
 
 function handleTrackPayload(data) {
     if (!data || typeof data !== 'object') return;
@@ -453,7 +461,52 @@ function handleTrackPayload(data) {
         _trackImg = null;
         syncCoverFromWidget();
     }
+    // Guarda artista/nombre para Media Session (lockscreen / notificación)
+    if (typeof data.iArtist === 'string') _trackArtist = data.iArtist;
+    if (typeof data.iName === 'string') _trackName = data.iName;
+    updateMediaSession();
 }
+
+// ===== MEDIA SESSION API =====
+// Sustituye el "adriangnz.github.io" de la notificación lockscreen por el
+// nombre del track + artista + portada.
+function updateMediaSession() {
+    if (!('mediaSession' in navigator)) return;
+    const title = _trackName || 'Chronos iRadio';
+    const artist = _trackArtist || 'Radio en directo desde Venezuela';
+    const artworkUrl = _trackImg ? upgradeImgResolution(_trackImg) : null;
+    const artwork = artworkUrl ? [
+        { src: artworkUrl, sizes: '600x600', type: 'image/jpeg' },
+        { src: artworkUrl, sizes: '512x512', type: 'image/jpeg' },
+        { src: artworkUrl, sizes: '256x256', type: 'image/jpeg' },
+        { src: artworkUrl, sizes: '128x128', type: 'image/jpeg' }
+    ] : [
+        { src: 'assets/logo/chronos-512.png', sizes: '512x512', type: 'image/png' },
+        { src: 'assets/logo/chronos-192.png', sizes: '192x192', type: 'image/png' }
+    ];
+    try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title, artist, album: 'Chronos iRadio', artwork
+        });
+    } catch (e) {}
+}
+
+function setupMediaSessionHandlers() {
+    if (!('mediaSession' in navigator)) return;
+    try {
+        navigator.mediaSession.setActionHandler('play', () => {
+            if (!isPlaying()) { const b = orbPlayButton(); if (b) b.click(); }
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+            if (isPlaying()) { const b = orbPlayButton(); if (b) b.click(); }
+        });
+        navigator.mediaSession.setActionHandler('stop', () => {
+            if (isPlaying()) { const b = orbPlayButton(); if (b) b.click(); }
+        });
+    } catch (e) {}
+}
+setupMediaSessionHandlers();
+updateMediaSession();
 
 function syncCoverFromWidget() {
     const cover = document.getElementById('fspCoverImg');

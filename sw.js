@@ -7,10 +7,11 @@
 //   - /assets/**   → stale-while-revalidate (rápido + actualiza background)
 //   - cross-origin (stream/widget/fonts) → passthrough, no se toca
 
-const VERSION = 'chronos-iradio-v1.2.0';
+const VERSION = 'chronos-iradio-v1.3.0';
 const SHELL = [
     './',
     './index.html',
+    './player.html',
     './styles.css',
     './app.js',
     './assets/logo/chronos-192.png',
@@ -64,7 +65,12 @@ self.addEventListener('fetch', (event) => {
     if (isCritical) {
         event.respondWith(
             fetch(req).then((res) => cachePut(req, res))
-                .catch(() => caches.match(req).then((r) => r || caches.match('./index.html')))
+                .catch(() => caches.match(req).then((r) => {
+                    if (r) return r;
+                    // Fallback offline: si pedían player.html, dale player.html
+                    const isPlayer = url.pathname.endsWith('/player.html');
+                    return caches.match(isPlayer ? './player.html' : './index.html');
+                }))
         );
         return;
     }

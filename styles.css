@@ -685,6 +685,27 @@ section { position: relative; z-index: 1; padding: 80px 0; }
 }
 .fsp.active { pointer-events: auto; opacity: 1; }
 
+/* ===== Página dedicada al player (player.html) ===== */
+body.player-only {
+    padding-bottom: 0;
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+}
+body.player-only .fsp { z-index: 1; }
+body.player-only .fsp .fsp-close { display: none; }
+body.player-only .fsp-content { transform: none !important; }
+/* Widget OnlineRadioBox: necesario para el stream pero invisible */
+.orb-host {
+    position: fixed;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    left: -9999px;
+    top: 0;
+}
+
 .fsp-backdrop {
     position: absolute;
     inset: 0;

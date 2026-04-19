@@ -16,4 +16,10 @@
             <image:title>Chronos iRadio - Logo</image:title>
         </image:image>
     </url>
+    <url>
+        <loc>https://chronosiradio.online/player.html</loc>
+        <lastmod>2026-04-19</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
 </urlset>
