@@ -424,6 +424,32 @@ function syncFspUI() {
 
     updateTrackText();
     updateMuteIcon();
+    syncCoverFromWidget();
+}
+
+// Lee la imagen que el widget ORB pone en .orbPti (actualizada cada vez que
+// cambia el track) y la usa como cover del fullscreen player. Hace upgrade
+// de resolución para mzstatic.com (CDN Apple Music) — viene en 360x360, la
+// subimos a 600x600 para que no se vea pixelada.
+const LOCAL_LOGO = 'assets/logo/chronos-192.jpg';
+function syncCoverFromWidget() {
+    const root = orbRoot();
+    const cover = document.getElementById('fspCoverImg');
+    if (!root || !cover) return;
+    const ti = root.querySelector('.orbPti');
+    const src = (ti && ti.getAttribute('src')) || '';
+
+    // El logo del stream default (no es del track) → nuestro logo local
+    const isStationLogo = /cdn\.onlineradiobox\.com\/img\/l\//.test(src);
+    const target = (isStationLogo || !src)
+        ? LOCAL_LOGO
+        : src.replace(/\/(\d+)x(\d+)bb\.(jpg|jpeg|png|webp)/i, '/600x600bb.$3');
+
+    // Solo actualiza si cambió (evita reflow innecesario)
+    const current = cover.getAttribute('src') || '';
+    if (current.split('?')[0] !== target.split('?')[0]) {
+        cover.src = target;
+    }
 }
 
 function updateTrackText() {
