@@ -666,6 +666,7 @@ function setVolumeViaWidget(v) {
     if (!root) return false;
     const orbV = root.querySelector('.orbV');
     const track = root.querySelector('.orbVC');
+    const thumb = root.querySelector('.orbVCs');
     if (!orbV || !track) return false;
     // Expandir el contenedor del slider temporalmente para tener ancho medible
     const prevStyle = orbV.getAttribute('style') || '';
@@ -678,12 +679,56 @@ function setVolumeViaWidget(v) {
     }
     const x = rect.left + rect.width * v;
     const y = rect.top + rect.height / 2;
-    const opts = { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, view: window };
-    ['mousedown', 'mousemove', 'mouseup', 'click'].forEach(type => {
-        track.dispatchEvent(new MouseEvent(type, opts));
-    });
+
+    // Dispara mouse + pointer + touch events en track y thumb. El widget
+    // puede escuchar cualquiera; mandamos los tres tipos para cubrir bases.
+    function fire(target, types, EventCls, extra) {
+        types.forEach((type) => {
+            const init = Object.assign({
+                bubbles: true, cancelable: true, view: window,
+                clientX: x, clientY: y, screenX: x, screenY: y,
+                button: 0, buttons: 1
+            }, extra || {});
+            try { target.dispatchEvent(new EventCls(type, init)); } catch (e) {}
+        });
+    }
+    fire(track, ['mousedown', 'mousemove', 'mouseup', 'click'], MouseEvent);
+    if (window.PointerEvent) {
+        fire(track, ['pointerdown', 'pointermove', 'pointerup'], PointerEvent, {
+            pointerType: 'mouse', isPrimary: true, pointerId: 1
+        });
+    }
+    if (thumb) {
+        fire(thumb, ['mousedown', 'mouseup', 'click'], MouseEvent);
+        if (window.PointerEvent) {
+            fire(thumb, ['pointerdown', 'pointerup'], PointerEvent, {
+                pointerType: 'mouse', isPrimary: true, pointerId: 1
+            });
+        }
+        // Mover el thumb visualmente por si el widget lo lee como estado
+        try { thumb.style.left = Math.round(v * 100) + '%'; } catch (e) {}
+    }
     setTimeout(() => { orbV.setAttribute('style', prevStyle); }, 120);
     return true;
+}
+
+function setVolumeViaApi(v) {
+    if (!window.orbp_w) return false;
+    const id = 'orb_player_145cb053ba408304';
+    // Probar firmas conocidas / posibles del widget
+    try { if (typeof orbp_w.setVolume === 'function') { orbp_w.setVolume(id, v); return true; } } catch (e) {}
+    try { if (typeof orbp_w.volume === 'function') { orbp_w.volume(id, v); return true; } } catch (e) {}
+    // Vía cmd queue (forma estándar del widget)
+    try {
+        if (orbp_w.cmd && typeof orbp_w.cmd.push === 'function') {
+            orbp_w.cmd.push(function () {
+                if (typeof orbp_w.setVolume === 'function') orbp_w.setVolume(id, v);
+                else if (typeof orbp_w.volume === 'function') orbp_w.volume(id, v);
+            });
+            return true;
+        }
+    } catch (e) {}
+    return false;
 }
 
 function setVolume(v) {
@@ -693,6 +738,8 @@ function setVolume(v) {
         audio.volume = v;
         audio.muted = v === 0;
     }
+    // Tres vías en paralelo — la que funcione, gana
+    setVolumeViaApi(v);
     setVolumeViaWidget(v);
 }
 

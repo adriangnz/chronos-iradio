@@ -695,19 +695,22 @@ body.player-only {
 body.player-only .fsp { z-index: 1; }
 body.player-only .fsp .fsp-close { display: none; }
 body.player-only .fsp-content { transform: none !important; }
-/* Widget OnlineRadioBox: necesario para el stream pero invisible.
-   Dimensiones reales + off-screen para que el slider .orbV se pueda
-   expandir y los clicks sintéticos del control de volumen aterricen
-   en coordenadas válidas. pointer-events:none evita interacción real. */
+/* Widget OnlineRadioBox: necesario para el stream + control de volumen,
+   pero queremos que sea invisible. ON-SCREEN (no off-screen) para que el
+   widget no se autodesactive y los clicks sintéticos del volumen aterricen
+   en coordenadas válidas. opacity:0 + pointer-events:none lo hacen
+   imperceptible y no interactuable por el usuario. z-index:-1 lo manda
+   debajo del player. */
 .orb-host {
     position: fixed;
+    top: 0;
+    left: 0;
     width: 360px;
     height: 80px;
     overflow: visible;
     opacity: 0;
     pointer-events: none;
-    left: -10000px;
-    top: 0;
+    z-index: -1;
 }
 .orb-host .orbP { width: 360px; }
 
