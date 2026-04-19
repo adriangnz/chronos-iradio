@@ -695,23 +695,13 @@ body.player-only {
 body.player-only .fsp { z-index: 1; }
 body.player-only .fsp .fsp-close { display: none; }
 body.player-only .fsp-content { transform: none !important; }
-/* Widget OnlineRadioBox en player.html: queda renderizado y plenamente
-   funcional (opacidad 1, pointer-events normales), pero el fullscreen
-   player con z-index 500 lo tapa completamente al usuario. Esto es
-   necesario porque el widget se autodesactiva o no procesa clicks
-   sintéticos cuando está oculto con opacity:0 / off-screen / pointer-events:none. */
-.orb-host {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    z-index: 1;
-    background: rgba(12,12,20,0.95);
-    padding: 4px 0;
-}
-.orb-host .orbP { max-width: 600px; margin: 0 auto; }
+/* En player.html el widget se monta en .player-bar (igual que en index.html
+   para que se inicialice idéntico y mis clicks sintéticos del slider
+   funcionen), pero el fullscreen player con z-index 500 lo cubre por
+   completo. El widget queda 100% funcional sin que el usuario lo vea. */
 body.player-only .fsp { z-index: 500; }
+body.player-only .player-bar { z-index: 1; }
+body.player-only .player-expand { display: none; }
 
 .fsp-backdrop {
     position: absolute;

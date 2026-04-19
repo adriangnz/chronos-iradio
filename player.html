@@ -77,8 +77,11 @@
         </div>
     </div>
 
-    <!-- Widget OnlineRadioBox oculto: necesario para el stream pero sin UI propia -->
-    <div class="orb-host" aria-hidden="true">
+    <!-- Widget OnlineRadioBox: misma estructura que en index.html para que el
+         widget se inicialice idéntico y los clicks sintéticos del volumen
+         funcionen. Queda DEBAJO del fullscreen player (z-index) y oculto. -->
+    <div class="player-bar" id="playerBar" aria-hidden="true">
+        <div class="player-bar-inner" style="position:relative;">
         <div class="orbP" id="orb_player_145cb053ba408304" vlm="0.8">
             <style media="screen">
               .orbP{position:relative;box-sizing:border-box;overflow:hidden;font-weight:normal;border:1px solid transparent;user-select:none;text-align:left}.orbP br,.orbP>br{display:none!important}.orbP p,.orbP>p{margin:0!important;padding:0!important;line-height:normal!important;font-size:inherit!important}.orbPh{display:block;position:absolute;z-index:100;top:50%;margin-top:-12px!important;right:10px;width:21px!important;text-decoration:none!important;cursor:pointer}.orbPh>img{margin:0!important;border:none;height:24px!important}.orbPt{text-decoration:none!important}.orbPti{float:left;margin:0 10px 0 0!important;height:48px!important;width:89px!important}.orbPtn{display:block;margin-right:52px;line-height:24px!important;font-size:17px!important;font-weight:bold!important}.orbPtt{display:block;margin-right:52px;text-decoration:none!important;line-height:24px!important;font-size:12px!important}.orbPp,.orbPs{float:left!important;margin:0 10px 0 0!important;padding:0!important;height:48px!important;width:48px!important;line-height:48px!important;border-radius:2px!important;border:none!important;text-align:center!important;cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none!important}.orbPp::before,.orbPs::before{display:inline-block;vertical-align:middle;content:'';width:0;height:0;border-style:solid}.orbPp::before{border-width:16px 0 16px 26px}.orbPs::before{border-width:16px}.orbPhc{position:relative!important;box-sizing:border-box!important;padding:10px!important;overflow:hidden}
@@ -104,6 +107,7 @@
               s.src = "https://ecdn.onlineradiobox.com/js/pwidget2.min.235ca64e.js";
               var t = document.getElementsByTagName('script')[0]; t.parentNode.insertBefore(s, t);
             </script>
+        </div>
         </div>
     </div>
 
