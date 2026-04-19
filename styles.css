@@ -695,24 +695,23 @@ body.player-only {
 body.player-only .fsp { z-index: 1; }
 body.player-only .fsp .fsp-close { display: none; }
 body.player-only .fsp-content { transform: none !important; }
-/* Widget OnlineRadioBox: necesario para el stream + control de volumen,
-   pero queremos que sea invisible. ON-SCREEN (no off-screen) para que el
-   widget no se autodesactive y los clicks sintéticos del volumen aterricen
-   en coordenadas válidas. opacity:0 + pointer-events:none lo hacen
-   imperceptible y no interactuable por el usuario. z-index:-1 lo manda
-   debajo del player. */
+/* Widget OnlineRadioBox en player.html: queda renderizado y plenamente
+   funcional (opacidad 1, pointer-events normales), pero el fullscreen
+   player con z-index 500 lo tapa completamente al usuario. Esto es
+   necesario porque el widget se autodesactiva o no procesa clicks
+   sintéticos cuando está oculto con opacity:0 / off-screen / pointer-events:none. */
 .orb-host {
     position: fixed;
-    top: 0;
+    bottom: 0;
     left: 0;
-    width: 360px;
+    right: 0;
     height: 80px;
-    overflow: visible;
-    opacity: 0;
-    pointer-events: none;
-    z-index: -1;
+    z-index: 1;
+    background: rgba(12,12,20,0.95);
+    padding: 4px 0;
 }
-.orb-host .orbP { width: 360px; }
+.orb-host .orbP { max-width: 600px; margin: 0 auto; }
+body.player-only .fsp { z-index: 500; }
 
 .fsp-backdrop {
     position: absolute;
