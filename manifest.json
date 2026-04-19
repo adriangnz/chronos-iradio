@@ -12,6 +12,7 @@
     "theme_color": "#0a0a0f",
     "lang": "es",
     "dir": "ltr",
+    "prefer_related_applications": false,
     "categories": ["music", "entertainment"],
     "icons": [
         {

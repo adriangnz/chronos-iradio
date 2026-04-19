@@ -555,7 +555,22 @@ document.addEventListener('keydown', (e) => {
 // ===== PWA: Service Worker + install prompt =====
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
+        // updateViaCache: 'none' fuerza al browser a siempre chequear updates
+        // del script del SW (no cachearlo por HTTP).
+        navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+            .then((reg) => {
+                // Cuando un nuevo SW toma control, recarga la página una vez
+                // para que use los assets nuevos (CSS/JS). Evita loops con un flag.
+                let reloaded = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (reloaded) return;
+                    reloaded = true;
+                    location.reload();
+                });
+                // Busca updates al arrancar
+                reg.update().catch(() => {});
+            })
+            .catch(() => {});
     });
 }
 
