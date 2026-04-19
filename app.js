@@ -663,17 +663,21 @@ waitForOrb();
 //   3) audio.muted cuando v === 0 (garantiza al menos mute funcional).
 function setVolumeViaWidget(v) {
     const root = orbRoot();
+    console.log('[VOL][widget] root?', !!root);
     if (!root) return false;
     const orbV = root.querySelector('.orbV');
     const track = root.querySelector('.orbVC');
     const thumb = root.querySelector('.orbVCs');
+    console.log('[VOL][widget] orbV?', !!orbV, 'track?', !!track, 'thumb?', !!thumb);
     if (!orbV || !track) return false;
     // Expandir el contenedor del slider temporalmente para tener ancho medible
     const prevStyle = orbV.getAttribute('style') || '';
     orbV.style.setProperty('width', '160px', 'important');
     orbV.offsetWidth; // forzar reflow
     const rect = track.getBoundingClientRect();
+    console.log('[VOL][widget] track rect:', JSON.stringify({ x: rect.left, y: rect.top, w: rect.width, h: rect.height }));
     if (rect.width < 10) {
+        console.warn('[VOL][widget] track width < 10, abortando. width =', rect.width);
         orbV.setAttribute('style', prevStyle);
         return false;
     }
@@ -692,6 +696,7 @@ function setVolumeViaWidget(v) {
             try { target.dispatchEvent(new EventCls(type, init)); } catch (e) {}
         });
     }
+    console.log('[VOL][widget] firing events at x=', x, 'y=', y, 'for v=', v);
     fire(track, ['mousedown', 'mousemove', 'mouseup', 'click'], MouseEvent);
     if (window.PointerEvent) {
         fire(track, ['pointerdown', 'pointermove', 'pointerup'], PointerEvent, {
@@ -709,47 +714,63 @@ function setVolumeViaWidget(v) {
         try { thumb.style.left = Math.round(v * 100) + '%'; } catch (e) {}
     }
     setTimeout(() => { orbV.setAttribute('style', prevStyle); }, 120);
+    console.log('[VOL][widget] done. audio.volume now =', orbAudio() && orbAudio().volume);
     return true;
 }
 
 function setVolumeViaApi(v) {
+    console.log('[VOL][api] orbp_w?', !!window.orbp_w, 'keys:', window.orbp_w ? Object.keys(window.orbp_w) : null);
     if (!window.orbp_w) return false;
     const id = 'orb_player_145cb053ba408304';
-    // Probar firmas conocidas / posibles del widget
-    try { if (typeof orbp_w.setVolume === 'function') { orbp_w.setVolume(id, v); return true; } } catch (e) {}
-    try { if (typeof orbp_w.volume === 'function') { orbp_w.volume(id, v); return true; } } catch (e) {}
-    // Vía cmd queue (forma estándar del widget)
+    try { if (typeof orbp_w.setVolume === 'function') { console.log('[VOL][api] orbp_w.setVolume(id, v)'); orbp_w.setVolume(id, v); return true; } } catch (e) { console.warn('[VOL][api] setVolume err:', e); }
+    try { if (typeof orbp_w.volume === 'function') { console.log('[VOL][api] orbp_w.volume(id, v)'); orbp_w.volume(id, v); return true; } } catch (e) { console.warn('[VOL][api] volume err:', e); }
     try {
         if (orbp_w.cmd && typeof orbp_w.cmd.push === 'function') {
+            console.log('[VOL][api] orbp_w.cmd.push(...)');
             orbp_w.cmd.push(function () {
                 if (typeof orbp_w.setVolume === 'function') orbp_w.setVolume(id, v);
                 else if (typeof orbp_w.volume === 'function') orbp_w.volume(id, v);
             });
             return true;
         }
-    } catch (e) {}
+    } catch (e) { console.warn('[VOL][api] cmd err:', e); }
+    console.warn('[VOL][api] no API method found');
     return false;
 }
 
 function setVolume(v) {
     v = Math.max(0, Math.min(1, v));
     const audio = orbAudio();
+    console.log('[VOL] setVolume(', v, ') — audio?', !!audio, 'audio.volume before:', audio && audio.volume, 'muted:', audio && audio.muted);
     if (audio) {
         audio.volume = v;
         audio.muted = v === 0;
+        console.log('[VOL] after audio.volume = v → audio.volume:', audio.volume);
     }
     // Tres vías en paralelo — la que funcione, gana
-    setVolumeViaApi(v);
-    setVolumeViaWidget(v);
+    const apiOk = setVolumeViaApi(v);
+    const widgetOk = setVolumeViaWidget(v);
+    console.log('[VOL] result: apiOk=', apiOk, 'widgetOk=', widgetOk);
+    // Re-leer después de 200ms para ver si el widget revirtió
+    setTimeout(() => {
+        const a2 = orbAudio();
+        console.log('[VOL] +200ms audio.volume:', a2 && a2.volume, 'muted:', a2 && a2.muted);
+    }, 200);
 }
 
 const fspVol = document.getElementById('fspVolume');
+console.log('[VOL][init] fspVolume el?', !!fspVol);
 if (fspVol) {
     fspVol.addEventListener('input', (e) => {
+        console.log('[VOL][slider] input event, value =', e.target.value);
         setVolume(parseFloat(e.target.value) / 100);
     });
     fspVol.addEventListener('change', (e) => {
+        console.log('[VOL][slider] change event, value =', e.target.value);
         setVolume(parseFloat(e.target.value) / 100);
+    });
+    fspVol.addEventListener('pointerdown', () => {
+        console.log('[VOL][slider] pointerdown — orb root?', !!orbRoot(), 'audio?', !!orbAudio());
     });
 }
 
