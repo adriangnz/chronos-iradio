@@ -427,30 +427,116 @@ function syncFspUI() {
     syncCoverFromWidget();
 }
 
-// Lee la imagen que el widget ORB pone en .orbPti (actualizada cada vez que
-// cambia el track) y la usa como cover del fullscreen player. Hace upgrade
-// de resolución para mzstatic.com (CDN Apple Music) — viene en 360x360, la
-// subimos a 600x600 para que no se vea pixelada.
+// Cover del fullscreen player: el widget ORB hace fetch/XHR a su endpoint de
+// track y la respuesta incluye iImg (portada). Interceptamos esos requests
+// para extraer la portada aunque el widget no la ponga en el DOM.
 const LOCAL_LOGO = 'assets/logo/chronos-192.jpg';
+let _trackImg = null;
+
+function upgradeImgResolution(url) {
+    if (!url) return url;
+    // CDN Apple Music (mzstatic.com) expone múltiples tamaños en la URL
+    return url.replace(/\/(\d+)x(\d+)bb\.(jpg|jpeg|png|webp)/i, '/600x600bb.$3');
+}
+
+function handleTrackPayload(data) {
+    if (!data || typeof data !== 'object') return;
+    // El payload de track tiene iImg/iArtist/iName/trackId/title
+    if (!data.iImg && !data.trackId && !data.title) return;
+    const img = typeof data.iImg === 'string' ? data.iImg : null;
+    if (img && img !== _trackImg) {
+        _trackImg = img;
+        syncCoverFromWidget();
+    }
+    // Si el endpoint explícitamente dice que no hay track, volver al logo
+    if (data.trackId === null || data.trackId === 0) {
+        _trackImg = null;
+        syncCoverFromWidget();
+    }
+}
+
 function syncCoverFromWidget() {
-    const root = orbRoot();
     const cover = document.getElementById('fspCoverImg');
-    if (!root || !cover) return;
-    const ti = root.querySelector('.orbPti');
-    const src = (ti && ti.getAttribute('src')) || '';
-
-    // El logo del stream default (no es del track) → nuestro logo local
-    const isStationLogo = /cdn\.onlineradiobox\.com\/img\/l\//.test(src);
-    const target = (isStationLogo || !src)
-        ? LOCAL_LOGO
-        : src.replace(/\/(\d+)x(\d+)bb\.(jpg|jpeg|png|webp)/i, '/600x600bb.$3');
-
-    // Solo actualiza si cambió (evita reflow innecesario)
+    if (!cover) return;
+    const target = _trackImg
+        ? upgradeImgResolution(_trackImg)
+        : LOCAL_LOGO;
     const current = cover.getAttribute('src') || '';
     if (current.split('?')[0] !== target.split('?')[0]) {
         cover.src = target;
     }
 }
+
+// Interceptores para capturar la respuesta de track del widget.
+// El widget hace requests a endpoints de onlineradiobox.com con el JSON que
+// tiene iImg/title/trackId. No sabemos la URL exacta pero sí la forma del
+// payload — filtramos por las claves.
+(function patchTrackInterceptors() {
+    // console.log — el widget emite "Track response:" con el objeto. Captura
+    // confiable incluso si app.js se carga después de los primeros fetches.
+    const origLog = console.log;
+    console.log = function() {
+        try {
+            for (let i = 0; i < arguments.length; i++) {
+                const arg = arguments[i];
+                if (arg && typeof arg === 'object' && (arg.iImg || arg.trackId !== undefined || arg.title)) {
+                    handleTrackPayload(arg);
+                    break;
+                }
+            }
+        } catch (e) {}
+        return origLog.apply(this, arguments);
+    };
+
+    // fetch
+    if (window.fetch) {
+        const origFetch = window.fetch;
+        window.fetch = function(input, init) {
+            return origFetch.apply(this, arguments).then((res) => {
+                try {
+                    const url = typeof input === 'string' ? input : (input && input.url) || '';
+                    if (/onlineradiobox\.com/i.test(url) && res && res.ok) {
+                        const ct = res.headers.get('content-type') || '';
+                        if (/json/i.test(ct)) {
+                            res.clone().json().then(handleTrackPayload).catch(() => {});
+                        }
+                    }
+                } catch (e) {}
+                return res;
+            });
+        };
+    }
+
+    // XMLHttpRequest
+    const XHR = window.XMLHttpRequest;
+    if (XHR && XHR.prototype) {
+        const origOpen = XHR.prototype.open;
+        const origSend = XHR.prototype.send;
+        XHR.prototype.open = function(method, url) {
+            this.__orbUrl = url;
+            return origOpen.apply(this, arguments);
+        };
+        XHR.prototype.send = function() {
+            const xhr = this;
+            xhr.addEventListener('load', function() {
+                try {
+                    if (!xhr.__orbUrl || !/onlineradiobox\.com/i.test(xhr.__orbUrl)) return;
+                    const text = xhr.responseText || '';
+                    if (!text) return;
+                    // Intento directo JSON.parse
+                    try {
+                        handleTrackPayload(JSON.parse(text));
+                    } catch (e) {
+                        // JSONP u otro envoltorio: extrae el primer objeto que parezca un track
+                        const m = text.match(/\{[^]*?"iImg"\s*:\s*"[^"]+"[^]*?\}/);
+                        if (m) { try { handleTrackPayload(JSON.parse(m[0])); } catch (e2) {} }
+                    }
+                } catch (e) {}
+            });
+            return origSend.apply(this, arguments);
+        };
+    }
+})();
 
 function updateTrackText() {
     const track = document.getElementById('fspTrack');
