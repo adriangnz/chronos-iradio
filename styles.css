@@ -695,16 +695,21 @@ body.player-only {
 body.player-only .fsp { z-index: 1; }
 body.player-only .fsp .fsp-close { display: none; }
 body.player-only .fsp-content { transform: none !important; }
-/* Widget OnlineRadioBox: necesario para el stream pero invisible */
+/* Widget OnlineRadioBox: necesario para el stream pero invisible.
+   Dimensiones reales + off-screen para que el slider .orbV se pueda
+   expandir y los clicks sintéticos del control de volumen aterricen
+   en coordenadas válidas. pointer-events:none evita interacción real. */
 .orb-host {
     position: fixed;
-    width: 1px; height: 1px;
-    overflow: hidden;
+    width: 360px;
+    height: 80px;
+    overflow: visible;
     opacity: 0;
     pointer-events: none;
-    left: -9999px;
+    left: -10000px;
     top: 0;
 }
+.orb-host .orbP { width: 360px; }
 
 .fsp-backdrop {
     position: absolute;
