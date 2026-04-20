@@ -719,24 +719,70 @@ function setVolumeViaWidget(v) {
 }
 
 function setVolumeViaApi(v) {
-    console.log('[VOL][api] orbp_w?', !!window.orbp_w, 'keys:', window.orbp_w ? Object.keys(window.orbp_w) : null);
     if (!window.orbp_w) return false;
     const id = 'orb_player_145cb053ba408304';
-    try { if (typeof orbp_w.setVolume === 'function') { console.log('[VOL][api] orbp_w.setVolume(id, v)'); orbp_w.setVolume(id, v); return true; } } catch (e) { console.warn('[VOL][api] setVolume err:', e); }
-    try { if (typeof orbp_w.volume === 'function') { console.log('[VOL][api] orbp_w.volume(id, v)'); orbp_w.volume(id, v); return true; } } catch (e) { console.warn('[VOL][api] volume err:', e); }
+    const w = window.orbp_w;
+
+    // Candidato #1: volumeControl (parece API pública)
+    if (typeof w.volumeControl === 'function') {
+        try { w.volumeControl(id, v); console.log('[VOL][api] volumeControl(id,v) OK'); return true; } catch (e) { console.warn('[VOL][api] volumeControl(id,v) err:', e); }
+        try { w.volumeControl(v); console.log('[VOL][api] volumeControl(v) OK'); return true; } catch (e) { console.warn('[VOL][api] volumeControl(v) err:', e); }
+    }
+
+    // Candidato #2: runCmd — el widget tiene cola de comandos genéricos
+    if (typeof w.runCmd === 'function') {
+        const sigs = [
+            [id, 'setVolume', v], [id, 'volume', v], [id, 'volumeControl', v],
+            ['setVolume', id, v], ['setVolume', v], ['volume', id, v],
+            [{ cmd: 'setVolume', id: id, value: v }]
+        ];
+        for (const args of sigs) {
+            try { w.runCmd.apply(w, args); console.log('[VOL][api] runCmd', args, 'OK'); return true; } catch (e) {}
+        }
+    }
+
+    // Candidato #3: videojs — el widget usa videojs por debajo
+    if (w.videojs) {
+        try {
+            // videojs(id) devuelve la instancia del player
+            const player = (typeof w.videojs === 'function') ? w.videojs(id) : w.videojs;
+            if (player && typeof player.volume === 'function') {
+                player.volume(v);
+                if (typeof player.muted === 'function') player.muted(v === 0);
+                console.log('[VOL][api] videojs(id).volume(v) OK');
+                return true;
+            }
+        } catch (e) { console.warn('[VOL][api] videojs err:', e); }
+    }
+
+    // Candidato #4: cola cmd para diferir hasta que el widget esté listo
     try {
-        if (orbp_w.cmd && typeof orbp_w.cmd.push === 'function') {
-            console.log('[VOL][api] orbp_w.cmd.push(...)');
-            orbp_w.cmd.push(function () {
-                if (typeof orbp_w.setVolume === 'function') orbp_w.setVolume(id, v);
-                else if (typeof orbp_w.volume === 'function') orbp_w.volume(id, v);
+        if (w.cmd && typeof w.cmd.push === 'function') {
+            w.cmd.push(function () {
+                if (typeof w.volumeControl === 'function') { try { w.volumeControl(id, v); } catch (e) {} }
+                else if (typeof w.setVolume === 'function') { try { w.setVolume(id, v); } catch (e) {} }
             });
+            console.log('[VOL][api] cmd.push() queued');
             return true;
         }
-    } catch (e) { console.warn('[VOL][api] cmd err:', e); }
-    console.warn('[VOL][api] no API method found');
+    } catch (e) {}
     return false;
 }
+
+// Helper diagnóstico — invocable desde la consola: __orbDebug()
+window.__orbDebug = function () {
+    const w = window.orbp_w || {};
+    const id = 'orb_player_145cb053ba408304';
+    console.log('orbp_w keys:', Object.keys(w));
+    ['volumeControl', 'runCmd', 'setVolume', 'volume', 'videojs', 'init'].forEach((k) => {
+        console.log('  ', k, '→', typeof w[k]);
+    });
+    if (typeof w.videojs === 'function') {
+        try { const p = w.videojs(id); console.log('videojs(id):', p, 'has volume?', typeof p.volume); } catch (e) { console.warn(e); }
+    } else if (w.videojs) {
+        console.log('videojs (no función):', w.videojs);
+    }
+};
 
 function setVolume(v) {
     v = Math.max(0, Math.min(1, v));
