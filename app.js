@@ -726,10 +726,11 @@ function getOrbPlayers() {
     const results = [];
     for (const id of ORB_PLAYER_IDS) {
         let p = null;
+        // SOLO lectura — videojs(id) crearía un player nuevo si no existe
+        // (rompe el widget original con un skin default "Video Player loading…")
         try {
-            if (typeof w.videojs === 'function') p = w.videojs(id);
-            if (!p && w.videojs.getPlayer) p = w.videojs.getPlayer(id);
-            if (!p && w.videojs.players) p = w.videojs.players[id];
+            if (w.videojs.players && w.videojs.players[id]) p = w.videojs.players[id];
+            if (!p && typeof w.videojs.getPlayer === 'function') p = w.videojs.getPlayer(id);
         } catch (e) {}
         if (p && typeof p.volume === 'function') results.push(p);
     }
