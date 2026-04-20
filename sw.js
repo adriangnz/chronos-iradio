@@ -7,7 +7,7 @@
 //   - /assets/**   → stale-while-revalidate (rápido + actualiza background)
 //   - cross-origin (stream/widget/fonts) → passthrough, no se toca
 
-const VERSION = 'chronos-iradio-v1.3.0';
+const VERSION = 'chronos-iradio-v1.4.0';
 const SHELL = [
     './',
     './index.html',

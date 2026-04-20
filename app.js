@@ -716,31 +716,38 @@ function setVolumeViaWidget(v) {
 // uno con método .volume()
 let _cachedPlayer = null;
 function getOrbPlayer() {
+    console.log('[VOL] getOrbPlayer — cached?', !!_cachedPlayer, 'orbp_w?', !!window.orbp_w);
     if (_cachedPlayer && typeof _cachedPlayer.volume === 'function') return _cachedPlayer;
     const w = window.orbp_w;
     if (!w) return null;
     const id = 'orb_player_145cb053ba408304';
     const candidates = [];
+    console.log('[VOL] videojs type:', typeof w.videojs, 'value:', w.videojs);
     if (typeof w.videojs === 'function') {
-        try { candidates.push(w.videojs(id)); } catch (e) {}
+        try { const p = w.videojs(id); console.log('[VOL] videojs(id) →', p); candidates.push(p); } catch (e) { console.warn('[VOL] videojs(id) threw:', e); }
+        if (typeof w.videojs.getPlayer === 'function') {
+            try { const p = w.videojs.getPlayer(id); console.log('[VOL] videojs.getPlayer(id) →', p); candidates.push(p); } catch (e) {}
+        }
+        if (w.videojs.players) {
+            console.log('[VOL] videojs.players keys:', Object.keys(w.videojs.players));
+            if (w.videojs.players[id]) candidates.push(w.videojs.players[id]);
+        }
+    } else if (w.videojs && typeof w.videojs === 'object') {
+        if (typeof w.videojs.volume === 'function') candidates.push(w.videojs);
         if (typeof w.videojs.getPlayer === 'function') {
             try { candidates.push(w.videojs.getPlayer(id)); } catch (e) {}
         }
-        if (w.videojs.players && w.videojs.players[id]) candidates.push(w.videojs.players[id]);
     }
-    if (w.videojs && typeof w.videojs.volume === 'function') candidates.push(w.videojs);
-    if (w.videojs && w.videojs.getPlayer) {
-        try { candidates.push(w.videojs.getPlayer(id)); } catch (e) {}
-    }
-    // Algunos widgets exponen los players por id directo
     if (w.players && w.players[id]) candidates.push(w.players[id]);
+    console.log('[VOL] candidates:', candidates.length, candidates);
     for (const p of candidates) {
-        if (p && typeof p.volume === 'function') { _cachedPlayer = p; return p; }
+        if (p && typeof p.volume === 'function') {
+            _cachedPlayer = p;
+            console.log('[VOL] ✓ found player:', p);
+            return p;
+        }
     }
-    console.warn('[VOL] No videojs player found. orbp_w keys:', Object.keys(w),
-        'videojs type:', typeof w.videojs,
-        'videojs has getPlayer?', !!(w.videojs && w.videojs.getPlayer),
-        'videojs has players?', !!(w.videojs && w.videojs.players));
+    console.warn('[VOL] ✗ No videojs player found.');
     return null;
 }
 
@@ -750,6 +757,7 @@ function setVolumeViaApi(v) {
     try {
         player.volume(v);
         if (typeof player.muted === 'function') player.muted(v === 0);
+        console.log('[VOL] ✓ player.volume(', v, ') applied');
         return true;
     } catch (e) { console.warn('[VOL] player.volume() err:', e); return false; }
 }
@@ -770,22 +778,26 @@ window.__orbDebug = function () {
 };
 
 function setVolume(v) {
+    console.log('[VOL] setVolume(', v, ')');
     v = Math.max(0, Math.min(1, v));
     const audio = orbAudio();
     if (audio) {
         audio.volume = v;
         audio.muted = v === 0;
     }
-    // Vía oficial del widget (firma volumeControl(elemento, valor))
-    setVolumeViaApi(v);
+    const ok = setVolumeViaApi(v);
+    console.log('[VOL] setVolumeViaApi returned:', ok);
 }
 
 const fspVol = document.getElementById('fspVolume');
+console.log('[VOL][init] fspVolume el?', !!fspVol);
 if (fspVol) {
     fspVol.addEventListener('input', (e) => {
+        console.log('[VOL][slider] input', e.target.value);
         setVolume(parseFloat(e.target.value) / 100);
     });
     fspVol.addEventListener('change', (e) => {
+        console.log('[VOL][slider] change', e.target.value);
         setVolume(parseFloat(e.target.value) / 100);
     });
 }
