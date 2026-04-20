@@ -292,9 +292,9 @@ function togglePlay() {
     if (btn) btn.click();
 }
 
-// El widget ORB ignora audio.muted/volume directos. Implementamos mute como
-// "volumen a 0" usando setVolume() (que simula click en el slider del widget),
-// guardando el volumen previo para restaurarlo al unmute.
+// El widget ORB ignora audio.muted/volume directos. Mute = volumen a 0
+// vía setVolume() (que llama a la API videojs interna del widget); guarda
+// el volumen previo para restaurarlo al unmute.
 let _preMuteVolume = 0.8;
 
 function isCurrentlyMuted() {
@@ -655,62 +655,6 @@ function waitForOrb() {
 waitForOrb();
 
 // ===== VOLUMEN =====
-// Web Audio API falla por CORS en el stream remoto (createMediaElementSource
-// dispara "AudioContext encountered an error" 60veces/seg). Usamos en su
-// lugar 3 rutas en paralelo y dejamos que gane la que funcione:
-//   1) audio.volume (funciona si el widget no tiene un gain propio).
-//   2) Simular click en el slider del widget (.orbVC) — lo que haría el usuario.
-//   3) audio.muted cuando v === 0 (garantiza al menos mute funcional).
-function setVolumeViaWidget(v) {
-    const root = orbRoot();
-    if (!root) return false;
-    const orbV = root.querySelector('.orbV');
-    const track = root.querySelector('.orbVC');
-    const thumb = root.querySelector('.orbVCs');
-    if (!orbV || !track) return false;
-    const prevStyle = orbV.getAttribute('style') || '';
-    orbV.style.setProperty('width', '160px', 'important');
-    orbV.offsetWidth;
-    const rect = track.getBoundingClientRect();
-    if (rect.width < 10) {
-        orbV.setAttribute('style', prevStyle);
-        return false;
-    }
-    const x = rect.left + rect.width * v;
-    const y = rect.top + rect.height / 2;
-
-    // Dispara mouse + pointer + touch events en track y thumb. El widget
-    // puede escuchar cualquiera; mandamos los tres tipos para cubrir bases.
-    function fire(target, types, EventCls, extra) {
-        types.forEach((type) => {
-            const init = Object.assign({
-                bubbles: true, cancelable: true, view: window,
-                clientX: x, clientY: y, screenX: x, screenY: y,
-                button: 0, buttons: 1
-            }, extra || {});
-            try { target.dispatchEvent(new EventCls(type, init)); } catch (e) {}
-        });
-    }
-    fire(track, ['mousedown', 'mousemove', 'mouseup', 'click'], MouseEvent);
-    if (window.PointerEvent) {
-        fire(track, ['pointerdown', 'pointermove', 'pointerup'], PointerEvent, {
-            pointerType: 'mouse', isPrimary: true, pointerId: 1
-        });
-    }
-    if (thumb) {
-        fire(thumb, ['mousedown', 'mouseup', 'click'], MouseEvent);
-        if (window.PointerEvent) {
-            fire(thumb, ['pointerdown', 'pointerup'], PointerEvent, {
-                pointerType: 'mouse', isPrimary: true, pointerId: 1
-            });
-        }
-        // Mover el thumb visualmente por si el widget lo lee como estado
-        try { thumb.style.left = Math.round(v * 100) + '%'; } catch (e) {}
-    }
-    setTimeout(() => { orbV.setAttribute('style', prevStyle); }, 120);
-    return true;
-}
-
 // El widget OnlineRadioBox crea DOS players videojs:
 //   - orb_player_..._p → el <audio> real, donde vive el control de volumen
 //   - orb_player_...   → el wrapper UI (volume() en este NO afecta el sonido)
@@ -750,21 +694,6 @@ function setVolumeViaApi(v) {
     }
     return ok;
 }
-
-// Helper diagnóstico — invocable desde la consola: __orbDebug()
-window.__orbDebug = function () {
-    const w = window.orbp_w || {};
-    const id = 'orb_player_145cb053ba408304';
-    console.log('orbp_w keys:', Object.keys(w));
-    ['volumeControl', 'runCmd', 'setVolume', 'volume', 'videojs', 'init'].forEach((k) => {
-        console.log('  ', k, '→', typeof w[k]);
-    });
-    if (typeof w.videojs === 'function') {
-        try { const p = w.videojs(id); console.log('videojs(id):', p, 'has volume?', typeof p.volume); } catch (e) { console.warn(e); }
-    } else if (w.videojs) {
-        console.log('videojs (no función):', w.videojs);
-    }
-};
 
 function setVolume(v) {
     v = Math.max(0, Math.min(1, v));
