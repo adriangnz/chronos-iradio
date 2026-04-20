@@ -711,55 +711,43 @@ function setVolumeViaWidget(v) {
     return true;
 }
 
-// Obtiene el player real del widget. orbp_w.videojs puede ser la lib o la
-// instancia ya inicializada; probamos las formas comunes hasta encontrar
-// uno con método .volume()
-let _cachedPlayer = null;
-function getOrbPlayer() {
-    console.log('[VOL] getOrbPlayer — cached?', !!_cachedPlayer, 'orbp_w?', !!window.orbp_w);
-    if (_cachedPlayer && typeof _cachedPlayer.volume === 'function') return _cachedPlayer;
+// El widget OnlineRadioBox crea DOS players videojs:
+//   - orb_player_..._p → el <audio> real, donde vive el control de volumen
+//   - orb_player_...   → el wrapper UI (volume() en este NO afecta el sonido)
+// Aplicamos a AMBOS por seguridad; el _p es el que realmente cambia el sonido.
+const ORB_PLAYER_IDS = [
+    'orb_player_145cb053ba408304_p',
+    'orb_player_145cb053ba408304'
+];
+
+function getOrbPlayers() {
     const w = window.orbp_w;
-    if (!w) return null;
-    const id = 'orb_player_145cb053ba408304';
-    const candidates = [];
-    console.log('[VOL] videojs type:', typeof w.videojs, 'value:', w.videojs);
-    if (typeof w.videojs === 'function') {
-        try { const p = w.videojs(id); console.log('[VOL] videojs(id) →', p); candidates.push(p); } catch (e) { console.warn('[VOL] videojs(id) threw:', e); }
-        if (typeof w.videojs.getPlayer === 'function') {
-            try { const p = w.videojs.getPlayer(id); console.log('[VOL] videojs.getPlayer(id) →', p); candidates.push(p); } catch (e) {}
-        }
-        if (w.videojs.players) {
-            console.log('[VOL] videojs.players keys:', Object.keys(w.videojs.players));
-            if (w.videojs.players[id]) candidates.push(w.videojs.players[id]);
-        }
-    } else if (w.videojs && typeof w.videojs === 'object') {
-        if (typeof w.videojs.volume === 'function') candidates.push(w.videojs);
-        if (typeof w.videojs.getPlayer === 'function') {
-            try { candidates.push(w.videojs.getPlayer(id)); } catch (e) {}
-        }
+    if (!w || !w.videojs) return [];
+    const results = [];
+    for (const id of ORB_PLAYER_IDS) {
+        let p = null;
+        try {
+            if (typeof w.videojs === 'function') p = w.videojs(id);
+            if (!p && w.videojs.getPlayer) p = w.videojs.getPlayer(id);
+            if (!p && w.videojs.players) p = w.videojs.players[id];
+        } catch (e) {}
+        if (p && typeof p.volume === 'function') results.push(p);
     }
-    if (w.players && w.players[id]) candidates.push(w.players[id]);
-    console.log('[VOL] candidates:', candidates.length, candidates);
-    for (const p of candidates) {
-        if (p && typeof p.volume === 'function') {
-            _cachedPlayer = p;
-            console.log('[VOL] ✓ found player:', p);
-            return p;
-        }
-    }
-    console.warn('[VOL] ✗ No videojs player found.');
-    return null;
+    return results;
 }
 
 function setVolumeViaApi(v) {
-    const player = getOrbPlayer();
-    if (!player) return false;
-    try {
-        player.volume(v);
-        if (typeof player.muted === 'function') player.muted(v === 0);
-        console.log('[VOL] ✓ player.volume(', v, ') applied');
-        return true;
-    } catch (e) { console.warn('[VOL] player.volume() err:', e); return false; }
+    const players = getOrbPlayers();
+    if (!players.length) return false;
+    let ok = false;
+    for (const p of players) {
+        try {
+            p.volume(v);
+            if (typeof p.muted === 'function') p.muted(v === 0);
+            ok = true;
+        } catch (e) {}
+    }
+    return ok;
 }
 
 // Helper diagnóstico — invocable desde la consola: __orbDebug()
@@ -778,26 +766,21 @@ window.__orbDebug = function () {
 };
 
 function setVolume(v) {
-    console.log('[VOL] setVolume(', v, ')');
     v = Math.max(0, Math.min(1, v));
     const audio = orbAudio();
     if (audio) {
         audio.volume = v;
         audio.muted = v === 0;
     }
-    const ok = setVolumeViaApi(v);
-    console.log('[VOL] setVolumeViaApi returned:', ok);
+    setVolumeViaApi(v);
 }
 
 const fspVol = document.getElementById('fspVolume');
-console.log('[VOL][init] fspVolume el?', !!fspVol);
 if (fspVol) {
     fspVol.addEventListener('input', (e) => {
-        console.log('[VOL][slider] input', e.target.value);
         setVolume(parseFloat(e.target.value) / 100);
     });
     fspVol.addEventListener('change', (e) => {
-        console.log('[VOL][slider] change', e.target.value);
         setVolume(parseFloat(e.target.value) / 100);
     });
 }
