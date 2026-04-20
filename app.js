@@ -711,22 +711,47 @@ function setVolumeViaWidget(v) {
     return true;
 }
 
-function setVolumeViaApi(v) {
-    if (!window.orbp_w) return false;
+// Obtiene el player real del widget. orbp_w.videojs puede ser la lib o la
+// instancia ya inicializada; probamos las formas comunes hasta encontrar
+// uno con método .volume()
+let _cachedPlayer = null;
+function getOrbPlayer() {
+    if (_cachedPlayer && typeof _cachedPlayer.volume === 'function') return _cachedPlayer;
     const w = window.orbp_w;
-    const root = orbRoot();
-    const orbV = root && root.querySelector('.orbV');
-
-    // ✓ Firma correcta del widget: volumeControl(elementoDeVolumen, valor)
-    // El error "matchVolume.getElementsByClassName is not a function" reveló
-    // que el primer arg debe ser el Element .orbV, no el id.
-    if (typeof w.volumeControl === 'function' && orbV) {
-        try {
-            w.volumeControl(orbV, v);
-            return true;
-        } catch (e) { console.warn('[VOL][api] volumeControl(orbV, v) err:', e); }
+    if (!w) return null;
+    const id = 'orb_player_145cb053ba408304';
+    const candidates = [];
+    if (typeof w.videojs === 'function') {
+        try { candidates.push(w.videojs(id)); } catch (e) {}
+        if (typeof w.videojs.getPlayer === 'function') {
+            try { candidates.push(w.videojs.getPlayer(id)); } catch (e) {}
+        }
+        if (w.videojs.players && w.videojs.players[id]) candidates.push(w.videojs.players[id]);
     }
-    return false;
+    if (w.videojs && typeof w.videojs.volume === 'function') candidates.push(w.videojs);
+    if (w.videojs && w.videojs.getPlayer) {
+        try { candidates.push(w.videojs.getPlayer(id)); } catch (e) {}
+    }
+    // Algunos widgets exponen los players por id directo
+    if (w.players && w.players[id]) candidates.push(w.players[id]);
+    for (const p of candidates) {
+        if (p && typeof p.volume === 'function') { _cachedPlayer = p; return p; }
+    }
+    console.warn('[VOL] No videojs player found. orbp_w keys:', Object.keys(w),
+        'videojs type:', typeof w.videojs,
+        'videojs has getPlayer?', !!(w.videojs && w.videojs.getPlayer),
+        'videojs has players?', !!(w.videojs && w.videojs.players));
+    return null;
+}
+
+function setVolumeViaApi(v) {
+    const player = getOrbPlayer();
+    if (!player) return false;
+    try {
+        player.volume(v);
+        if (typeof player.muted === 'function') player.muted(v === 0);
+        return true;
+    } catch (e) { console.warn('[VOL] player.volume() err:', e); return false; }
 }
 
 // Helper diagnóstico — invocable desde la consola: __orbDebug()
