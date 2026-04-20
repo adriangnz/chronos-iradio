@@ -663,21 +663,16 @@ waitForOrb();
 //   3) audio.muted cuando v === 0 (garantiza al menos mute funcional).
 function setVolumeViaWidget(v) {
     const root = orbRoot();
-    console.log('[VOL][widget] root?', !!root);
     if (!root) return false;
     const orbV = root.querySelector('.orbV');
     const track = root.querySelector('.orbVC');
     const thumb = root.querySelector('.orbVCs');
-    console.log('[VOL][widget] orbV?', !!orbV, 'track?', !!track, 'thumb?', !!thumb);
     if (!orbV || !track) return false;
-    // Expandir el contenedor del slider temporalmente para tener ancho medible
     const prevStyle = orbV.getAttribute('style') || '';
     orbV.style.setProperty('width', '160px', 'important');
-    orbV.offsetWidth; // forzar reflow
+    orbV.offsetWidth;
     const rect = track.getBoundingClientRect();
-    console.log('[VOL][widget] track rect:', JSON.stringify({ x: rect.left, y: rect.top, w: rect.width, h: rect.height }));
     if (rect.width < 10) {
-        console.warn('[VOL][widget] track width < 10, abortando. width =', rect.width);
         orbV.setAttribute('style', prevStyle);
         return false;
     }
@@ -696,7 +691,6 @@ function setVolumeViaWidget(v) {
             try { target.dispatchEvent(new EventCls(type, init)); } catch (e) {}
         });
     }
-    console.log('[VOL][widget] firing events at x=', x, 'y=', y, 'for v=', v);
     fire(track, ['mousedown', 'mousemove', 'mouseup', 'click'], MouseEvent);
     if (window.PointerEvent) {
         fire(track, ['pointerdown', 'pointermove', 'pointerup'], PointerEvent, {
@@ -714,58 +708,24 @@ function setVolumeViaWidget(v) {
         try { thumb.style.left = Math.round(v * 100) + '%'; } catch (e) {}
     }
     setTimeout(() => { orbV.setAttribute('style', prevStyle); }, 120);
-    console.log('[VOL][widget] done. audio.volume now =', orbAudio() && orbAudio().volume);
     return true;
 }
 
 function setVolumeViaApi(v) {
     if (!window.orbp_w) return false;
-    const id = 'orb_player_145cb053ba408304';
     const w = window.orbp_w;
+    const root = orbRoot();
+    const orbV = root && root.querySelector('.orbV');
 
-    // Candidato #1: volumeControl (parece API pública)
-    if (typeof w.volumeControl === 'function') {
-        try { w.volumeControl(id, v); console.log('[VOL][api] volumeControl(id,v) OK'); return true; } catch (e) { console.warn('[VOL][api] volumeControl(id,v) err:', e); }
-        try { w.volumeControl(v); console.log('[VOL][api] volumeControl(v) OK'); return true; } catch (e) { console.warn('[VOL][api] volumeControl(v) err:', e); }
-    }
-
-    // Candidato #2: runCmd — el widget tiene cola de comandos genéricos
-    if (typeof w.runCmd === 'function') {
-        const sigs = [
-            [id, 'setVolume', v], [id, 'volume', v], [id, 'volumeControl', v],
-            ['setVolume', id, v], ['setVolume', v], ['volume', id, v],
-            [{ cmd: 'setVolume', id: id, value: v }]
-        ];
-        for (const args of sigs) {
-            try { w.runCmd.apply(w, args); console.log('[VOL][api] runCmd', args, 'OK'); return true; } catch (e) {}
-        }
-    }
-
-    // Candidato #3: videojs — el widget usa videojs por debajo
-    if (w.videojs) {
+    // ✓ Firma correcta del widget: volumeControl(elementoDeVolumen, valor)
+    // El error "matchVolume.getElementsByClassName is not a function" reveló
+    // que el primer arg debe ser el Element .orbV, no el id.
+    if (typeof w.volumeControl === 'function' && orbV) {
         try {
-            // videojs(id) devuelve la instancia del player
-            const player = (typeof w.videojs === 'function') ? w.videojs(id) : w.videojs;
-            if (player && typeof player.volume === 'function') {
-                player.volume(v);
-                if (typeof player.muted === 'function') player.muted(v === 0);
-                console.log('[VOL][api] videojs(id).volume(v) OK');
-                return true;
-            }
-        } catch (e) { console.warn('[VOL][api] videojs err:', e); }
-    }
-
-    // Candidato #4: cola cmd para diferir hasta que el widget esté listo
-    try {
-        if (w.cmd && typeof w.cmd.push === 'function') {
-            w.cmd.push(function () {
-                if (typeof w.volumeControl === 'function') { try { w.volumeControl(id, v); } catch (e) {} }
-                else if (typeof w.setVolume === 'function') { try { w.setVolume(id, v); } catch (e) {} }
-            });
-            console.log('[VOL][api] cmd.push() queued');
+            w.volumeControl(orbV, v);
             return true;
-        }
-    } catch (e) {}
+        } catch (e) { console.warn('[VOL][api] volumeControl(orbV, v) err:', e); }
+    }
     return false;
 }
 
@@ -787,36 +747,21 @@ window.__orbDebug = function () {
 function setVolume(v) {
     v = Math.max(0, Math.min(1, v));
     const audio = orbAudio();
-    console.log('[VOL] setVolume(', v, ') — audio?', !!audio, 'audio.volume before:', audio && audio.volume, 'muted:', audio && audio.muted);
     if (audio) {
         audio.volume = v;
         audio.muted = v === 0;
-        console.log('[VOL] after audio.volume = v → audio.volume:', audio.volume);
     }
-    // Tres vías en paralelo — la que funcione, gana
-    const apiOk = setVolumeViaApi(v);
-    const widgetOk = setVolumeViaWidget(v);
-    console.log('[VOL] result: apiOk=', apiOk, 'widgetOk=', widgetOk);
-    // Re-leer después de 200ms para ver si el widget revirtió
-    setTimeout(() => {
-        const a2 = orbAudio();
-        console.log('[VOL] +200ms audio.volume:', a2 && a2.volume, 'muted:', a2 && a2.muted);
-    }, 200);
+    // Vía oficial del widget (firma volumeControl(elemento, valor))
+    setVolumeViaApi(v);
 }
 
 const fspVol = document.getElementById('fspVolume');
-console.log('[VOL][init] fspVolume el?', !!fspVol);
 if (fspVol) {
     fspVol.addEventListener('input', (e) => {
-        console.log('[VOL][slider] input event, value =', e.target.value);
         setVolume(parseFloat(e.target.value) / 100);
     });
     fspVol.addEventListener('change', (e) => {
-        console.log('[VOL][slider] change event, value =', e.target.value);
         setVolume(parseFloat(e.target.value) / 100);
-    });
-    fspVol.addEventListener('pointerdown', () => {
-        console.log('[VOL][slider] pointerdown — orb root?', !!orbRoot(), 'audio?', !!orbAudio());
     });
 }
 
