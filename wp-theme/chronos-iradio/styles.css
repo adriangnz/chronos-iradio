@@ -654,20 +654,20 @@ section { position: relative; z-index: 1; padding: 80px 0; }
 }
 
 /* ===== FULLSCREEN PLAYER ===== */
-/* Animación: slide-up desde el bottom. El panel entra translateY(100%) → 0. */
+/* Animación: slide-up desde el bottom. El panel entra translateY(100%) → 0.
+   No usamos opacity en .fsp porque rompería un eventual backdrop-filter por
+   stacking context, y el background del .fsp-backdrop ya es sólido. */
 .fsp {
     position: fixed;
     inset: 0;
     z-index: 500;
     pointer-events: none;
-    opacity: 0;
     transform: translateY(100%);
-    transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform, opacity;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
 }
 .fsp.active {
     pointer-events: auto;
-    opacity: 1;
     transform: translateY(0);
 }
 
@@ -683,7 +683,7 @@ body.player-only .fsp .fsp-close { display: none; }
    para que se inicialice idéntico y mis clicks sintéticos del slider
    funcionen), pero el fullscreen player con z-index 500 lo cubre por
    completo. El widget queda 100% funcional sin que el usuario lo vea. */
-body.player-only .fsp { z-index: 500; transform: none !important; opacity: 1 !important; }
+body.player-only .fsp { z-index: 500; transform: none !important; }
 body.player-only .player-bar { z-index: 1; }
 body.player-only .player-expand { display: none; }
 
@@ -694,9 +694,7 @@ body.player-only .player-expand { display: none; }
         radial-gradient(circle at 20% 10%, rgba(139,92,246,0.35), transparent 55%),
         radial-gradient(circle at 85% 85%, rgba(236,72,153,0.25), transparent 50%),
         radial-gradient(circle at 50% 100%, rgba(59,130,246,0.3), transparent 60%),
-        rgba(8,8,14,0.96);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
+        var(--bg-primary);
 }
 
 .fsp-content {

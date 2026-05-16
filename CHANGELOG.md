@@ -7,6 +7,12 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-05-16
+
+### Corregido
+
+- **Fullscreen player con fondo transparente**: el `.fsp-backdrop` usaba `rgba(8,8,14,0.96)` + `backdrop-filter: blur(40px)`, pero la transición de `opacity` sobre `.fsp` rompía el stacking context del backdrop-filter, dejando ver el sitio detrás. Ahora el fondo es sólido (`var(--bg-primary)` = `#0a0a0f`) con los radial-gradient encima, y se quitó la transición de opacity (solo queda el `transform: translateY` para el slide-up). Sigue viéndose limpio y sin ningún hint de transparencia.
+
 ## [1.3.1] - 2026-05-16
 
 ### Cambiado
@@ -180,7 +186,8 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 - Animaciones fade-up con IntersectionObserver.
 - Patch de URLs protocol-relative para compatibilidad con `file://`.
 
-[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.2...HEAD
+[1.3.2]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.0.0...v1.2.0
