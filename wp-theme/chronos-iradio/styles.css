@@ -281,212 +281,174 @@ section { position: relative; z-index: 1; padding: 80px 0; }
     outline-offset: 4px;
 }
 
-/* ===== EQUIPO — Estado B: detail (preview + thumbs) ===== */
-.team-stage { display: block; }
-.team-detail {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 24px;
-    align-items: start;
-}
-.team-detail[hidden],
-.team-grid[hidden] { display: none; }
-
-.team-back {
-    grid-column: 1 / -1;
-    justify-self: start;
-    display: inline-flex;
+.team-card-hint {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px 8px 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 100px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 0.88rem;
-    font-weight: 500;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: var(--transition);
 }
-.team-back svg { width: 18px; height: 18px; }
-.team-back:hover {
-    background: rgba(255,255,255,0.08);
-    color: var(--text-primary);
-    transform: translateX(-2px);
-}
-.team-back:focus-visible {
-    outline: 2px solid var(--accent-blue);
-    outline-offset: 2px;
-}
+.team-card:hover .team-card-hint { opacity: 1; transform: scale(1); }
+.team-card-hint svg { width: 16px; height: 16px; color: #fff; }
 
-.team-preview {
+/* ===== TEAM MODAL ===== */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(0,0,0,0);
+    backdrop-filter: blur(0px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: background 0.4s ease, backdrop-filter 0.4s ease;
+}
+.modal-backdrop.active {
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(12px);
+    pointer-events: auto;
+}
+.modal-card {
+    display: flex;
+    max-width: 860px;
+    width: 52%;
+    max-height: 85vh;
+    border-radius: 20px;
+    overflow: hidden;
     background: var(--bg-card);
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
     position: relative;
-    box-shadow: var(--shadow);
+    transform: scale(0.85);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    z-index: 301;
 }
-
-.team-preview-photo {
-    width: 100%;
-    aspect-ratio: 16/10;
+.modal-backdrop.active .modal-card {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+.modal-img-wrap {
+    width: 320px;
+    flex-shrink: 0;
     position: relative;
     overflow: hidden;
-    background: var(--bg-secondary);
 }
-
-.team-preview-photo img {
+.modal-img-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 25%;
-    display: block;
 }
-
-.team-preview-photo::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 30%, rgba(10,10,15,0.92) 100%);
-    pointer-events: none;
-}
-
-.team-preview-info {
-    padding: 22px 28px 28px;
-    position: relative;
-}
-
-.team-preview-role {
-    display: inline-block;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: var(--accent-blue);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
-}
-
-.team-preview-name {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(1.6rem, 3vw, 2rem);
-    font-weight: 700;
-    line-height: 1.15;
-    margin-bottom: 14px;
-    color: var(--text-primary);
-}
-
-.team-preview-desc {
-    font-size: 0.98rem;
-    line-height: 1.7;
-    color: var(--text-secondary);
-    margin: 0;
-}
-
-/* Thumbs verticales en desktop */
-.team-thumbs {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 540px;
-    overflow-y: auto;
-    padding: 4px;
-    margin: -4px;
-}
-
-.team-thumb {
-    background: transparent;
-    border: 1px solid transparent;
-    padding: 8px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
-    color: inherit;
-}
-
-.team-thumb:hover {
-    background: rgba(255,255,255,0.03);
-    border-color: rgba(255,255,255,0.06);
-}
-
-.team-thumb.active {
-    background: rgba(59,130,246,0.10);
-    border-color: rgba(59,130,246,0.32);
-}
-
-.team-thumb img {
-    width: 80px;
-    height: 100px;
-    border-radius: var(--radius-sm);
-    object-fit: cover;
-    object-position: center 25%;
-    flex-shrink: 0;
-    transition: opacity 0.2s ease;
-    opacity: 0.55;
-    display: block;
-}
-
-.team-thumb:hover img { opacity: 0.9; }
-.team-thumb.active img { opacity: 1; }
-
-.team-thumb-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
+.modal-body {
     flex: 1;
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
 }
-
-.team-thumb-info strong {
+.modal-body h2 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: color 0.2s ease;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 4px;
 }
-
-.team-thumb.active .team-thumb-info strong {
-    color: var(--text-primary);
-}
-
-.team-thumb-info em {
-    font-style: normal;
-    font-size: 0.72rem;
+.modal-role {
+    font-size: 0.85rem;
     font-weight: 600;
-    color: var(--accent-blue);
+    color: var(--accent-cyan);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    line-height: 1.3;
+    margin-bottom: 20px;
+}
+.modal-body p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 10;
+}
+.modal-close:hover {
+    background: rgba(239,68,68,0.4);
+    border-color: rgba(239,68,68,0.5);
+}
+.modal-close svg { width: 18px; height: 18px; }
+
+.modal-sibling {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%) scale(0.65);
+    width: 240px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    cursor: pointer;
+    z-index: 299;
+    pointer-events: none;
+    opacity: 0;
+    filter: blur(1.5px) brightness(0.7);
+    transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+}
+.modal-backdrop.active .modal-sibling {
+    opacity: 0.55;
+    pointer-events: auto;
+    transition: opacity 0.4s ease 0.2s, transform 0.4s ease 0.2s, filter 0.3s ease 0.2s;
+}
+.modal-backdrop.active .modal-sibling:hover {
+    opacity: 0.9;
+    filter: blur(0px) brightness(1);
+    transform: translateY(-50%) scale(0.7);
+    transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+}
+.modal-sibling-img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+}
+.modal-sibling-info { padding: 10px 12px; }
+.modal-sibling-info h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0 0 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-.team-thumb:focus-visible {
-    outline: 2px solid var(--accent-blue);
-    outline-offset: 2px;
-}
-
-/* ===== View Transition: customización opcional de la transición team-hero ===== */
-::view-transition-old(team-hero),
-::view-transition-new(team-hero) {
-    animation-duration: 0.45s;
-    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-::view-transition-old(fsp-hero),
-::view-transition-new(fsp-hero) {
-    animation-duration: 0.5s;
-    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+.modal-sibling-info span {
+    font-size: 0.65rem;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 /* ===== ANNIVERSARY ===== */
@@ -635,34 +597,13 @@ section { position: relative; z-index: 1; padding: 80px 0; }
     .schedule-img img { width: 100%; }
     .schedule-info { padding: 16px; }
 
-    /* Equipo: grid de cards a 2 columnas; detail stack vertical + thumbs scroll horizontal */
     .team-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .team-detail { grid-template-columns: 1fr; gap: 16px; }
-    .team-preview-photo { aspect-ratio: 4/3; }
-    .team-preview-info { padding: 18px 20px 22px; }
-    .team-thumbs {
-        flex-direction: row;
-        max-height: none;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        gap: 10px;
-        padding: 4px;
-        margin: -4px;
-    }
-    .team-thumb {
-        flex-direction: column;
-        flex-shrink: 0;
-        align-items: center;
-        min-width: 92px;
-        padding: 8px 6px;
-        scroll-snap-align: start;
-    }
-    .team-thumb img { width: 64px; height: 64px; border-radius: 50%; }
-    .team-thumb-info { align-items: center; text-align: center; gap: 2px; }
-    .team-thumb-info strong { font-size: 0.78rem; max-width: 90px; }
-    .team-thumb-info em { font-size: 0.62rem; max-width: 90px; }
+
+    .modal-card { flex-direction: column; width: 94%; max-width: 440px; max-height: 92vh; }
+    .modal-img-wrap { width: 100%; height: 42vh; max-height: 420px; }
+    .modal-body { padding: 24px 22px; }
+    .modal-body h2 { font-size: 1.35rem; }
+    .modal-sibling { display: none; }
 
     .social-link span { display: none; }
     .social-link { padding: 14px; }
@@ -676,6 +617,7 @@ section { position: relative; z-index: 1; padding: 80px 0; }
 
 @media (max-width: 480px) {
     .hero h1 { font-size: 2.2rem; }
+    .team-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ===== PLAYER BAR: botón expandir =====
@@ -712,15 +654,22 @@ section { position: relative; z-index: 1; padding: 80px 0; }
 }
 
 /* ===== FULLSCREEN PLAYER ===== */
+/* Animación: slide-up desde el bottom. El panel entra translateY(100%) → 0. */
 .fsp {
     position: fixed;
     inset: 0;
     z-index: 500;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transform: translateY(100%);
+    transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, opacity;
 }
-.fsp.active { pointer-events: auto; opacity: 1; }
+.fsp.active {
+    pointer-events: auto;
+    opacity: 1;
+    transform: translateY(0);
+}
 
 /* ===== Página dedicada al player (player.html) ===== */
 body.player-only {
@@ -729,14 +678,12 @@ body.player-only {
     height: 100vh;
     height: 100dvh;
 }
-body.player-only .fsp { z-index: 1; }
 body.player-only .fsp .fsp-close { display: none; }
-body.player-only .fsp-content { transform: none !important; }
 /* En player.html el widget se monta en .player-bar (igual que en index.html
    para que se inicialice idéntico y mis clicks sintéticos del slider
    funcionen), pero el fullscreen player con z-index 500 lo cubre por
    completo. El widget queda 100% funcional sin que el usuario lo vea. */
-body.player-only .fsp { z-index: 500; }
+body.player-only .fsp { z-index: 500; transform: none !important; opacity: 1 !important; }
 body.player-only .player-bar { z-index: 1; }
 body.player-only .player-expand { display: none; }
 
@@ -762,10 +709,7 @@ body.player-only .player-expand { display: none; }
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    transform: translateY(32px);
-    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.fsp.active .fsp-content { transform: translateY(0); }
 
 .fsp-top {
     width: 100%;

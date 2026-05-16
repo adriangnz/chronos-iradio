@@ -2,7 +2,7 @@
 
 Tema mínimo que reemplaza por completo la interfaz de WordPress y sirve el sitio single-page de Chronos iRadio. Pensado para hostings donde solo se tiene acceso al panel de WordPress (`wp-admin`) y no hay FTP/SSH/cPanel.
 
-**Versión actual: 1.3.0** · **SW: `chronos-iradio-v1.5.0`**
+**Versión actual: 1.3.1** · **SW: `chronos-iradio-v1.5.0`**
 
 ## Qué hace este tema
 

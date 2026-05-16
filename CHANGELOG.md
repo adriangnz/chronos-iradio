@@ -7,6 +7,18 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-05-16
+
+### Cambiado
+
+- **Apertura/cierre del fullscreen player (#player)** vuelve a una animación CSS simple: slide-up de abajo hacia arriba (`transform: translateY(100%) → 0` con `cubic-bezier(0.22, 1, 0.36, 1)` 450 ms + crossfade de opacity). Más predecible y compatible con todos los browsers sin depender de View Transition API.
+- **Sección Equipo** restaurada al diseño anterior: grid de 4 cards con hover de zoom + modal con siblings prev/next (y swipe horizontal/vertical en móvil). Eliminado el layout "estilo HTTP 203" (preview + thumbs).
+
+### Eliminado
+
+- View Transition API (`document.startViewTransition`) removida del player y del switch del equipo (`_withViewTransition`, `_assignFspVTNames`, `_clearFspVTNames`, `showTeamMember`, `hideTeamMember`, `setActiveTeamMember`).
+- Estilos `.team-stage`, `.team-detail`, `.team-preview*`, `.team-thumbs`, `.team-thumb*`, `.team-back` y `::view-transition-*` removidos.
+
 ## [1.3.0] - 2026-05-16
 
 ### Añadido
@@ -168,7 +180,8 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 - Animaciones fade-up con IntersectionObserver.
 - Patch de URLs protocol-relative para compatibilidad con `file://`.
 
-[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.0.0...v1.2.0
 [1.0.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v0.3.0...v1.0.0

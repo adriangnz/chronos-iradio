@@ -272,73 +272,95 @@
                     Equipo
                 </span>
                 <h2>Quienes Somos</h2>
-                <p>Apasionados de la musica que conocen a fondo el impacto de cada cancion en la cultura popular.</p>
+                <p>Apasionados de la musica que conocen a fondo el impacto de cada cancion en la cultura popular. Haz clic para saber mas.</p>
             </div>
 
-            <div class="team-stage fade-up" id="teamStage">
-                <!-- Estado A: grid de cards (default) -->
-                <div class="team-grid" id="teamGrid">
-                    <button type="button" class="team-card stagger-1" data-team-idx="0" onclick="showTeamMember(0)" aria-label="Ver perfil de Km Rodriguez">
-                        <img class="team-card-img" src="assets/team/km-rodriguez.webp" alt="Km Rodriguez" width="300" height="400" loading="lazy" decoding="async">
-                        <div class="team-card-overlay"></div>
-                        <div class="team-card-label">
-                            <h3>Km Rodriguez</h3>
-                            <span>Creador & Director</span>
-                        </div>
-                        <div class="team-card-border"></div>
-                    </button>
-                    <button type="button" class="team-card stagger-2" data-team-idx="1" onclick="showTeamMember(1)" aria-label="Ver perfil de Eryx Rodriguez">
-                        <img class="team-card-img" src="assets/team/eryx-rodriguez.webp" alt="Eryx Rodriguez" width="300" height="400" loading="lazy" decoding="async">
-                        <div class="team-card-overlay"></div>
-                        <div class="team-card-label">
-                            <h3>Eryx Rodriguez</h3>
-                            <span>Produccion & Locutor</span>
-                        </div>
-                        <div class="team-card-border"></div>
-                    </button>
-                    <button type="button" class="team-card stagger-3" data-team-idx="2" onclick="showTeamMember(2)" aria-label="Ver perfil de Enrique Gonzalez">
-                        <img class="team-card-img" src="assets/team/enrique-gonzalez.webp" alt="Enrique Gonzalez" width="300" height="400" loading="lazy" decoding="async">
-                        <div class="team-card-overlay"></div>
-                        <div class="team-card-label">
-                            <h3>Enrique Gonzalez</h3>
-                            <span>Voz & Imagen</span>
-                        </div>
-                        <div class="team-card-border"></div>
-                    </button>
-                    <button type="button" class="team-card stagger-4" data-team-idx="3" onclick="showTeamMember(3)" aria-label="Ver perfil de Victor Grinfelds">
-                        <img class="team-card-img" src="assets/team/victor-grinfelds.webp" alt="Victor Grinfelds" width="300" height="400" loading="lazy" decoding="async">
-                        <div class="team-card-overlay"></div>
-                        <div class="team-card-label">
-                            <h3>Victor Grinfelds</h3>
-                            <span>Ingeniero</span>
-                        </div>
-                        <div class="team-card-border"></div>
-                    </button>
+            <div class="team-grid">
+                <div class="team-card fade-up stagger-1" onclick="openModal(0)" onkeydown="if(event.key==='Enter')openModal(0)" role="button" tabindex="0" aria-label="Ver perfil de Km Rodriguez">
+                    <img class="team-card-img" src="assets/team/km-rodriguez.webp" alt="Km Rodriguez" width="300" height="400" loading="lazy" decoding="async">
+                    <div class="team-card-overlay"></div>
+                    <div class="team-card-label">
+                        <h3>Km Rodriguez</h3>
+                        <span>Creador & Director</span>
+                    </div>
+                    <div class="team-card-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
+                    </div>
+                    <div class="team-card-border"></div>
                 </div>
 
-                <!-- Estado B: detail con preview + thumbs (oculto por default) -->
-                <div class="team-detail" id="teamDetail" hidden>
-                    <button type="button" class="team-back" onclick="hideTeamMember()" aria-label="Volver al listado del equipo">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-                        Volver
-                    </button>
-                    <article class="team-preview" id="teamPreview" role="tabpanel" aria-live="polite">
-                        <div class="team-preview-photo">
-                            <img id="teamPreviewImg" src="" alt="" width="800" height="500" decoding="async">
-                        </div>
-                        <div class="team-preview-info">
-                            <span class="team-preview-role" id="teamPreviewRole"></span>
-                            <h3 class="team-preview-name" id="teamPreviewName"></h3>
-                            <p class="team-preview-desc" id="teamPreviewDesc"></p>
-                        </div>
-                    </article>
-                    <div class="team-thumbs" id="teamThumbs" role="tablist" aria-label="Miembros del equipo">
-                        <!-- thumbs renderizados por JS desde teamData -->
+                <div class="team-card fade-up stagger-2" onclick="openModal(1)" onkeydown="if(event.key==='Enter')openModal(1)" role="button" tabindex="0" aria-label="Ver perfil de Eryx Rodriguez">
+                    <img class="team-card-img" src="assets/team/eryx-rodriguez.webp" alt="Eryx Rodriguez" width="300" height="400" loading="lazy" decoding="async">
+                    <div class="team-card-overlay"></div>
+                    <div class="team-card-label">
+                        <h3>Eryx Rodriguez</h3>
+                        <span>Produccion & Locutor</span>
                     </div>
+                    <div class="team-card-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
+                    </div>
+                    <div class="team-card-border"></div>
+                </div>
+
+                <div class="team-card fade-up stagger-3" onclick="openModal(2)" onkeydown="if(event.key==='Enter')openModal(2)" role="button" tabindex="0" aria-label="Ver perfil de Enrique Gonzalez">
+                    <img class="team-card-img" src="assets/team/enrique-gonzalez.webp" alt="Enrique Gonzalez" width="300" height="400" loading="lazy" decoding="async">
+                    <div class="team-card-overlay"></div>
+                    <div class="team-card-label">
+                        <h3>Enrique Gonzalez</h3>
+                        <span>Voz & Imagen</span>
+                    </div>
+                    <div class="team-card-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
+                    </div>
+                    <div class="team-card-border"></div>
+                </div>
+
+                <div class="team-card fade-up stagger-4" onclick="openModal(3)" onkeydown="if(event.key==='Enter')openModal(3)" role="button" tabindex="0" aria-label="Ver perfil de Victor Grinfelds">
+                    <img class="team-card-img" src="assets/team/victor-grinfelds.webp" alt="Victor Grinfelds" width="300" height="400" loading="lazy" decoding="async">
+                    <div class="team-card-overlay"></div>
+                    <div class="team-card-label">
+                        <h3>Victor Grinfelds</h3>
+                        <span>Ingeniero</span>
+                    </div>
+                    <div class="team-card-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
+                    </div>
+                    <div class="team-card-border"></div>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Team Modal -->
+    <div class="modal-backdrop" id="teamModal" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-labelledby="modalName">
+        <div class="modal-sibling modal-sibling-prev" id="siblingPrev" onclick="navigateModal(-1)" role="button" tabindex="0" aria-label="Miembro anterior">
+            <img class="modal-sibling-img" id="siblingPrevImg" src="" alt="" width="240" height="140" decoding="async">
+            <div class="modal-sibling-info">
+                <h4 id="siblingPrevName"></h4>
+                <span id="siblingPrevRole"></span>
+            </div>
+        </div>
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()" aria-label="Cerrar modal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div class="modal-img-wrap">
+                <img id="modalImg" src="" alt="" width="320" height="400" decoding="async">
+            </div>
+            <div class="modal-body">
+                <h2 id="modalName"></h2>
+                <div class="modal-role" id="modalRole"></div>
+                <p id="modalDesc"></p>
+            </div>
+        </div>
+        <div class="modal-sibling modal-sibling-next" id="siblingNext" onclick="navigateModal(1)" role="button" tabindex="0" aria-label="Miembro siguiente">
+            <img class="modal-sibling-img" id="siblingNextImg" src="" alt="" width="240" height="140" decoding="async">
+            <div class="modal-sibling-info">
+                <h4 id="siblingNextName"></h4>
+                <span id="siblingNextRole"></span>
+            </div>
+        </div>
+    </div>
 
     <!-- Anniversary -->
     <section class="anniversary">
