@@ -168,8 +168,22 @@ add_action( 'template_redirect', function () {
                 '"/chronos-iradio/?app=player"' => '"' . $home . '?app=player"',
                 '"./player.html"'               => '"' . $home . 'player.html"',
                 '"./"'                          => '"' . $home . '"',
-                '"assets/'                      => '"' . $theme_uri . 'assets/',
             ) );
+
+            // Reescribe "assets/..." a URL absoluta + cache-bust por filemtime
+            // para que un cambio del PNG fuerce a Android a regenerar el
+            // WebAPK con el icono nuevo (sin esperar el ciclo de ~30 dias).
+            $m = preg_replace_callback(
+                '#"(assets/[^"]+)"#',
+                function ( $matches ) use ( $theme_dir, $theme_uri ) {
+                    $rel   = $matches[1];
+                    $mtime = @filemtime( $theme_dir . '/' . $rel );
+                    $bust  = $mtime ? '?v=' . $mtime : '';
+                    return '"' . $theme_uri . $rel . $bust . '"';
+                },
+                $m
+            );
+
             echo $m;
             exit;
 
