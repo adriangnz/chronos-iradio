@@ -1,3 +1,14 @@
+<?php
+/**
+ * Template: Reproductor PWA (player.html).
+ *
+ * Se sirve desde la URL /player.html via rewrite en functions.php.
+ * Mismo HTML que el player.html original, con paths reescritos al tema.
+ */
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+$T = trailingslashit( get_template_directory_uri() );
+$HOME = trailingslashit( home_url( '/' ) );
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,21 +18,21 @@
     <meta name="description" content="Reproductor en vivo de Chronos iRadio.">
     <meta name="robots" content="noindex, follow">
     <meta name="theme-color" content="#0a0a0f">
-    <link rel="canonical" href="https://chronosiradio.online/player.html">
+    <link rel="canonical" href="<?php echo esc_url( $HOME . 'player.html' ); ?>">
 
-    <link rel="icon" href="assets/logo/chronos-32.jpg" sizes="32x32">
-    <link rel="icon" href="assets/logo/chronos-192.png" sizes="192x192">
-    <link rel="apple-touch-icon" href="assets/logo/chronos-180.jpg">
-    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="<?php echo esc_url( $T . 'assets/logo/chronos-32.jpg' ); ?>" sizes="32x32">
+    <link rel="icon" href="<?php echo esc_url( $T . 'assets/logo/chronos-192.png' ); ?>" sizes="192x192">
+    <link rel="apple-touch-icon" href="<?php echo esc_url( $T . 'assets/logo/chronos-180.jpg' ); ?>">
+    <link rel="manifest" href="<?php echo esc_url( $HOME . 'manifest.json' ); ?>">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://onlineradiobox.com">
     <link rel="dns-prefetch" href="https://cdn.onlineradiobox.com">
     <link rel="dns-prefetch" href="https://ecdn.onlineradiobox.com">
-    <link rel="preload" as="image" href="assets/logo/chronos-192.png">
+    <link rel="preload" as="image" href="<?php echo esc_url( $T . 'assets/logo/chronos-192.png' ); ?>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="<?php echo esc_url( $T . 'styles.css' ); ?>">
 </head>
 <body class="player-only">
 
@@ -38,7 +49,7 @@
             </div>
 
             <div class="fsp-cover">
-                <img id="fspCoverImg" src="assets/logo/chronos-192.png" alt="Chronos iRadio" width="192" height="192" onerror="this.onerror=null;this.src='assets/logo/chronos-192.png';">
+                <img id="fspCoverImg" src="<?php echo esc_url( chronos_asset_url( 'assets/logo/chronos-512.png' ) ); ?>" alt="Chronos iRadio" width="512" height="512" onerror="this.onerror=null;this.src='<?php echo esc_url( chronos_asset_url( 'assets/logo/chronos-512.png' ) ); ?>';">
             </div>
 
             <div class="fsp-info">
@@ -128,6 +139,7 @@
         </div>
     </div>
 
-    <script src="app.js" defer></script>
+    <script>window.CHRONOS_ASSET_BASE = <?php echo wp_json_encode( $T ); ?>;</script>
+    <script src="<?php echo esc_url( $T . 'app.js' ); ?>" defer></script>
 </body>
 </html>

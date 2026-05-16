@@ -1,0 +1,14 @@
+/* TEAM */
+Creador y Director: Km Rodriguez
+Produccion y Locutor: Eryx Rodriguez
+Voz e Imagen: Enrique Gonzalez
+Locutora: Franmary Fernandez
+Ingeniero: Victor Grinfelds
+
+/* SITE */
+Language: Espanol
+Doctype: HTML5
+IDE: Visual Studio Code + Claude Code
+Standards: HTML5, CSS3, JavaScript (vanilla)
+Components: OnlineRadioBox widget, Google Fonts (Inter, Space Grotesk)
+Contact: https://chronosiradio.online/#contacto

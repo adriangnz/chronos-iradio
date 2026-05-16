@@ -1,0 +1,5 @@
+# Backup local de logos antes del rebrand
+assets/logo/_backup-pre-relogo/
+
+# ZIPs de deploy del tema WP (artifacts, no son fuente)
+wp-theme/*.zip

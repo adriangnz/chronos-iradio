@@ -1,128 +1,31 @@
+<?php
+/**
+ * Front Page: Chronos iRadio single-page site.
+ *
+ * Equivalente al index.html original. Lo unico que queda aca es el markup del
+ * <body>; todo lo demas (meta tags SEO, JSON-LD, resource hints, preloads,
+ * stylesheets, scripts, title) lo maneja wp_head()/wp_footer() vehiculando
+ * los hooks de functions.php. Eso permite que plugins de cache/SEO se
+ * enganchen correctamente.
+ */
+$T = trailingslashit( get_template_directory_uri() );
+$HOME = trailingslashit( home_url( '/' ) );
+?>
 <!DOCTYPE html>
-<html lang="es">
+<html <?php language_attributes(); ?>>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chronos iRadio - Radio Online en Vivo</title>
-    <meta name="description" content="Chronos iRadio - Los clasicos de la musica de todos los tiempos. Radio online desde Venezuela dedicada a revivir la herencia musical de los ultimos 50 anos. Rock, pop, soul, jazz y musica latina.">
-    <meta name="robots" content="index, follow, max-image-preview:large">
-    <meta name="author" content="Chronos iRadio">
-    <meta name="theme-color" content="#0a0a0f">
-    <meta name="geo.region" content="VE">
-    <meta name="geo.placename" content="Venezuela">
-    <meta name="geo.position" content="10.48801;-66.87919">
-    <meta name="ICBM" content="10.48801, -66.87919">
-    <link rel="canonical" href="https://chronosiradio.online/">
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Chronos iRadio - Radio Online en Vivo">
-    <meta property="og:description" content="Los clasicos de la musica de todos los tiempos. Radio online desde Venezuela con rock, pop, soul, jazz y musica latina de los ultimos 50 anos.">
-    <meta property="og:url" content="https://chronosiradio.online/">
-    <meta property="og:image" content="https://chronosiradio.online/assets/og/og-banner-chronos.jpeg">
-    <meta property="og:image:width" content="1080">
-    <meta property="og:image:height" content="359">
-    <meta property="og:image:alt" content="Chronos iRadio - Radio online desde Venezuela">
-    <meta property="og:site_name" content="Chronos iRadio">
-    <meta property="og:locale" content="es_VE">
+    <!-- Manifest y humans.txt directo (no los maneja WP). Los favicons los
+         emite wp_head() desde Ajustes -> Generales -> Icono del sitio: WP
+         genera los crops 32, 192, 180 y msapplication tile automaticamente. -->
+    <link rel="manifest" href="<?php echo esc_url( $HOME . 'manifest.json' ); ?>">
+    <link rel="author" href="<?php echo esc_url( $HOME . 'humans.txt' ); ?>">
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Chronos iRadio - Radio Online en Vivo">
-    <meta name="twitter:description" content="Los clasicos de la musica de todos los tiempos. Radio online desde Venezuela con rock, pop, soul, jazz y musica latina de los ultimos 50 anos.">
-    <meta name="twitter:image" content="https://chronosiradio.online/assets/og/og-banner-chronos.jpeg">
-    <meta name="twitter:image:alt" content="Chronos iRadio - Radio online desde Venezuela">
-    <meta name="twitter:site" content="@chronos_iradio">
-
-    <!-- Favicon & Manifest -->
-    <link rel="icon" href="assets/logo/chronos-32.jpg" sizes="32x32">
-    <link rel="icon" href="assets/logo/chronos-192.jpg" sizes="192x192">
-    <link rel="apple-touch-icon" href="assets/logo/chronos-180.jpg">
-    <link rel="manifest" href="manifest.json">
-    <link rel="author" href="humans.txt">
-
-    <!-- Performance hints -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://onlineradiobox.com">
-    <link rel="dns-prefetch" href="https://cdn.onlineradiobox.com">
-    <link rel="dns-prefetch" href="https://ecdn.onlineradiobox.com">
-    <link rel="preload" as="image" href="assets/hero/banner-chronos.jpeg" fetchpriority="high">
-    <link rel="preload" as="image" href="assets/logo/chronos-512.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Schema.org JSON-LD -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "RadioStation",
-                "@id": "https://chronosiradio.online/#radiostation",
-                "name": "Chronos iRadio",
-                "url": "https://chronosiradio.online/",
-                "logo": "https://chronosiradio.online/assets/logo/chronos-192.jpg",
-                "image": "https://chronosiradio.online/assets/og/og-banner-chronos.jpeg",
-                "description": "Chronos iRadio es una estacion de radio dedicada a revivir y celebrar la rica herencia musical de los ultimos cincuenta anos. Desde los vibrantes ritmos del rock de los 70, pasando por las melodias del pop y el soul, hasta los inolvidables acordes del jazz y la musica latina.",
-                "genre": ["Rock", "Pop", "Soul", "Jazz", "Latin"],
-                "broadcastFrequency": "Online",
-                "broadcastTimezone": "America/Caracas",
-                "inLanguage": "es",
-                "areaServed": {
-                    "@type": "Country",
-                    "name": "Venezuela"
-                },
-                "address": {
-                    "@type": "PostalAddress",
-                    "addressCountry": "VE"
-                },
-                "sameAs": [
-                    "https://www.instagram.com/chronos_iradio",
-                    "https://whatsapp.com/channel/0029Vb71Xvi05MUjSz673L1W",
-                    "http://t.me/Km_rodriguez"
-                ],
-                "founder": {
-                    "@type": "Person",
-                    "name": "Km Rodriguez",
-                    "jobTitle": "Creador y Director"
-                },
-                "employee": [
-                    {
-                        "@type": "Person",
-                        "name": "Eryx Rodriguez",
-                        "jobTitle": "Produccion y Locutor"
-                    },
-                    {
-                        "@type": "Person",
-                        "name": "Enrique Gonzalez",
-                        "jobTitle": "Voz e Imagen"
-                    },
-                    {
-                        "@type": "Person",
-                        "name": "Franmary Fernandez",
-                        "jobTitle": "Locutora"
-                    },
-                    {
-                        "@type": "Person",
-                        "name": "Victor Grinfelds",
-                        "jobTitle": "Ingeniero"
-                    }
-                ]
-            },
-            {
-                "@type": "WebSite",
-                "@id": "https://chronosiradio.online/#website",
-                "url": "https://chronosiradio.online/",
-                "name": "Chronos iRadio",
-                "publisher": { "@id": "https://chronosiradio.online/#radiostation" },
-                "inLanguage": "es"
-            }
-        ]
-    }
-    </script>
-    <link rel="stylesheet" href="styles.css">
+    <?php wp_head(); ?>
 </head>
-<body>
+<body <?php body_class(); ?>>
 
     <a href="#main-content" class="skip-link">Saltar al contenido</a>
 
@@ -133,7 +36,7 @@
     <nav class="navbar" id="navbar">
         <div class="container">
             <a href="#" class="logo">
-                <img src="assets/logo/chronos-512.png" alt="Chronos iRadio" width="512" height="512" decoding="async">
+                <img src="<?php echo esc_url( chronos_asset_url( 'assets/logo/chronos-512.png' ) ); ?>" alt="Chronos iRadio" width="512" height="512" decoding="async">
                 <span class="logo-text">Chronos iRadio</span>
             </a>
             <ul class="nav-links">
@@ -169,10 +72,10 @@
     <!-- Hero -->
     <section class="hero" id="inicio">
         <div class="hero-bg">
-            <img src="assets/hero/banner-chronos.jpeg" alt="" width="1080" height="359" fetchpriority="high" decoding="async">
+            <img src="<?php echo esc_url( $T . 'assets/hero/banner-chronos.jpeg' ); ?>" alt="" width="1080" height="359" fetchpriority="high" decoding="async">
         </div>
         <div class="hero-content">
-            <img class="hero-logo" src="assets/logo/chronos-512.png" alt="Chronos iRadio Logo" width="512" height="512" fetchpriority="high" decoding="async">
+            <img class="hero-logo" src="<?php echo esc_url( chronos_asset_url( 'assets/logo/chronos-512.png' ) ); ?>" alt="Chronos iRadio Logo" width="512" height="512" fetchpriority="high" decoding="async">
             <h1><span>Chronos iRadio</span></h1>
             <p>Los clasicos de la musica de todos los tiempos. Rock, pop, soul, jazz y musica latina de los ultimos 50 anos, desde Venezuela para el mundo.</p>
             <div class="hero-actions">
@@ -204,7 +107,7 @@
                 <div class="schedule-item fade-up stagger-1">
                     <div class="schedule-number">01</div>
                     <div class="schedule-img">
-                        <img src="assets/programas/navegando-entre-decadas.webp" alt="Navegando entre Decadas" width="900" height="300" loading="lazy" decoding="async">
+                        <img src="<?php echo esc_url( $T . 'assets/programas/navegando-entre-decadas.webp' ); ?>" alt="Navegando entre Decadas" width="900" height="300" loading="lazy" decoding="async">
                     </div>
                     <div class="schedule-info">
                         <h3>Navegando entre Decadas</h3>
@@ -219,7 +122,7 @@
                 <div class="schedule-item fade-up stagger-2">
                     <div class="schedule-number">02</div>
                     <div class="schedule-img">
-                        <img src="assets/programas/chronos-icom.webp" alt="Chronos iCom" width="900" height="300" loading="lazy" decoding="async">
+                        <img src="<?php echo esc_url( $T . 'assets/programas/chronos-icom.webp' ); ?>" alt="Chronos iCom" width="900" height="300" loading="lazy" decoding="async">
                     </div>
                     <div class="schedule-info">
                         <h3>Chronos iCom</h3>
@@ -234,7 +137,7 @@
                 <div class="schedule-item fade-up stagger-3">
                     <div class="schedule-number">03</div>
                     <div class="schedule-img">
-                        <img src="assets/programas/top5.webp" alt="Top 5" width="900" height="300" loading="lazy" decoding="async">
+                        <img src="<?php echo esc_url( $T . 'assets/programas/top5.webp' ); ?>" alt="Top 5" width="900" height="300" loading="lazy" decoding="async">
                     </div>
                     <div class="schedule-info">
                         <h3>Top 5</h3>
@@ -249,7 +152,7 @@
                 <div class="schedule-item fade-up stagger-4">
                     <div class="schedule-number">04</div>
                     <div class="schedule-img">
-                        <img src="assets/programas/mundo-marino.webp" alt="Mundo Marino" width="900" height="300" loading="lazy" decoding="async">
+                        <img src="<?php echo esc_url( $T . 'assets/programas/mundo-marino.webp' ); ?>" alt="Mundo Marino" width="900" height="300" loading="lazy" decoding="async">
                     </div>
                     <div class="schedule-info">
                         <h3>Mundo Marino</h3>
@@ -278,7 +181,7 @@
 
             <div class="team-grid">
                 <div class="team-card fade-up stagger-1" onclick="openModal(0)" onkeydown="if(event.key==='Enter')openModal(0)" role="button" tabindex="0" aria-label="Ver perfil de Km Rodriguez">
-                    <img class="team-card-img" src="assets/team/km-rodriguez.webp" alt="Km Rodriguez" width="300" height="400" loading="lazy" decoding="async">
+                    <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/km-rodriguez.webp' ); ?>" alt="Km Rodriguez" width="300" height="400" loading="lazy" decoding="async">
                     <div class="team-card-overlay"></div>
                     <div class="team-card-label">
                         <h3>Km Rodriguez</h3>
@@ -291,7 +194,7 @@
                 </div>
 
                 <div class="team-card fade-up stagger-2" onclick="openModal(1)" onkeydown="if(event.key==='Enter')openModal(1)" role="button" tabindex="0" aria-label="Ver perfil de Eryx Rodriguez">
-                    <img class="team-card-img" src="assets/team/eryx-rodriguez.webp" alt="Eryx Rodriguez" width="300" height="400" loading="lazy" decoding="async">
+                    <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/eryx-rodriguez.webp' ); ?>" alt="Eryx Rodriguez" width="300" height="400" loading="lazy" decoding="async">
                     <div class="team-card-overlay"></div>
                     <div class="team-card-label">
                         <h3>Eryx Rodriguez</h3>
@@ -304,7 +207,7 @@
                 </div>
 
                 <div class="team-card fade-up stagger-3" onclick="openModal(2)" onkeydown="if(event.key==='Enter')openModal(2)" role="button" tabindex="0" aria-label="Ver perfil de Enrique Gonzalez">
-                    <img class="team-card-img" src="assets/team/enrique-gonzalez.webp" alt="Enrique Gonzalez" width="300" height="400" loading="lazy" decoding="async">
+                    <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/enrique-gonzalez.webp' ); ?>" alt="Enrique Gonzalez" width="300" height="400" loading="lazy" decoding="async">
                     <div class="team-card-overlay"></div>
                     <div class="team-card-label">
                         <h3>Enrique Gonzalez</h3>
@@ -317,7 +220,7 @@
                 </div>
 
                 <div class="team-card fade-up stagger-4" onclick="openModal(3)" onkeydown="if(event.key==='Enter')openModal(3)" role="button" tabindex="0" aria-label="Ver perfil de Franmary Fernandez">
-                    <img class="team-card-img" src="assets/team/franmary-fernandez.webp" alt="Franmary Fernandez" width="300" height="400" loading="lazy" decoding="async">
+                    <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/franmary-fernandez.webp' ); ?>" alt="Franmary Fernandez" width="300" height="400" loading="lazy" decoding="async">
                     <div class="team-card-overlay"></div>
                     <div class="team-card-label">
                         <h3>Franmary Fernandez</h3>
@@ -330,7 +233,7 @@
                 </div>
 
                 <div class="team-card fade-up" onclick="openModal(4)" onkeydown="if(event.key==='Enter')openModal(4)" role="button" tabindex="0" aria-label="Ver perfil de Victor Grinfelds">
-                    <img class="team-card-img" src="assets/team/victor-grinfelds.webp" alt="Victor Grinfelds" width="300" height="400" loading="lazy" decoding="async">
+                    <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/victor-grinfelds.webp' ); ?>" alt="Victor Grinfelds" width="300" height="400" loading="lazy" decoding="async">
                     <div class="team-card-overlay"></div>
                     <div class="team-card-label">
                         <h3>Victor Grinfelds</h3>
@@ -381,7 +284,7 @@
         <div class="container">
             <div class="anniversary-card fade-up">
                 <div class="anniversary-inner">
-                    <img src="assets/aniversario/banner-aniversario.webp" alt="1er Aniversario Chronos iRadio" width="1024" height="346" loading="lazy" decoding="async">
+                    <img src="<?php echo esc_url( $T . 'assets/aniversario/banner-aniversario.webp' ); ?>" alt="1er Aniversario Chronos iRadio" width="1024" height="346" loading="lazy" decoding="async">
                 </div>
             </div>
         </div>
@@ -493,44 +396,6 @@
               <div class="orbV"><div class="orbVb"><i class="_m"></i></div><div class="orbVC"><div class="orbVCs"></div></div></div>
             </div>
             <script>
-              // Fix protocol-relative URLs (//...) when opened via file://
-              if (location.protocol === 'file:') {
-                (function() {
-                  function fixUrl(u) { return (typeof u === 'string' && u.startsWith('//')) ? 'https:' + u : u; }
-
-                  // Patch script.src setter
-                  var desc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
-                  if (desc && desc.set) {
-                    var origSet = desc.set;
-                    Object.defineProperty(HTMLScriptElement.prototype, 'src', {
-                      set: function(v) { origSet.call(this, fixUrl(v)); },
-                      get: desc.get, configurable: true
-                    });
-                  }
-
-                  // Patch setAttribute for src/href
-                  var origSetAttr = Element.prototype.setAttribute;
-                  Element.prototype.setAttribute = function(n, v) {
-                    if (n === 'src' || n === 'href') v = fixUrl(v);
-                    return origSetAttr.call(this, n, v);
-                  };
-
-                  // Patch XMLHttpRequest.open
-                  var origXhrOpen = XMLHttpRequest.prototype.open;
-                  XMLHttpRequest.prototype.open = function(method, url) {
-                    arguments[1] = fixUrl(url);
-                    return origXhrOpen.apply(this, arguments);
-                  };
-
-                  // Patch fetch
-                  var origFetch = window.fetch;
-                  window.fetch = function(input) {
-                    if (typeof input === 'string') arguments[0] = fixUrl(input);
-                    return origFetch.apply(this, arguments);
-                  };
-                })();
-              }
-
               var orbp_w = orbp_w || { lang: "es-es" };
               orbp_w.cmd = orbp_w.cmd || [];
               orbp_w.apiUrl = "https://onlineradiobox.com";
@@ -559,7 +424,7 @@
             </div>
 
             <div class="fsp-cover">
-                <img id="fspCoverImg" src="assets/logo/chronos-192.jpg" alt="Chronos iRadio" width="192" height="192" onerror="this.onerror=null;this.src='assets/logo/chronos-192.jpg';">
+                <img id="fspCoverImg" src="<?php echo esc_url( chronos_asset_url( 'assets/logo/chronos-512.png' ) ); ?>" alt="Chronos iRadio" width="512" height="512" onerror="this.onerror=null;this.src='<?php echo esc_url( chronos_asset_url( 'assets/logo/chronos-512.png' ) ); ?>';">
             </div>
 
             <div class="fsp-info">
@@ -615,6 +480,6 @@
         </div>
     </div>
 
-    <script src="app.js" defer></script>
+    <?php wp_footer(); ?>
 </body>
 </html>
