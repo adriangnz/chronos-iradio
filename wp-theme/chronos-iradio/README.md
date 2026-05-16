@@ -1,113 +1,130 @@
 # Chronos iRadio — WordPress theme
 
-Tema mínimo que reemplaza por completo la interfaz de WordPress y sirve el
-sitio single-page de Chronos iRadio. Pensado para hostings donde solo se tiene
-acceso al panel de WordPress (`wp-admin`) y no hay FTP/SSH/cPanel.
+Tema mínimo que reemplaza por completo la interfaz de WordPress y sirve el sitio single-page de Chronos iRadio. Pensado para hostings donde solo se tiene acceso al panel de WordPress (`wp-admin`) y no hay FTP/SSH/cPanel.
+
+**Versión actual: 1.2.0** · **SW: `chronos-iradio-v1.5.0`**
 
 ## Qué hace este tema
 
-- La home (`/`) renderiza `front-page.php`, que es una copia 1:1 del
-  `index.html` original con los paths de assets adaptados al directorio del
-  tema.
-- Expone vía rewrites cuatro rutas que normalmente vivirían en la raíz del
-  document root pero que aquí están dentro del tema:
+- La home (`/`) renderiza `front-page.php`, que es una copia adaptada de `index.html` con paths de assets resueltos al directorio del tema.
+- Expone vía rewrites cuatro rutas desde la raíz del dominio:
 
-  | URL pública              | Servida desde                                   |
-  |--------------------------|-------------------------------------------------|
-  | `/sw.js`                 | `sw.js` (con header `Service-Worker-Allowed: /`)|
-  | `/manifest.json`         | `manifest.json` (paths reescritos al tema)      |
-  | `/player.html`           | `templates/player.php`                          |
-  | `/humans.txt`            | `humans.txt`                                    |
+  | URL pública | Servida desde |
+  |---|---|
+  | `/sw.js` | endpoint PHP que reescribe paths del SW + envía `Service-Worker-Allowed: /` |
+  | `/manifest.json` | endpoint PHP que reescribe paths + agrega `?v=<filemtime>` a cada icon (cache-bust) |
+  | `/player.html` | renderiza `templates/player.php` con `Cache-Control: no-cache` |
+  | `/humans.txt` | el archivo del tema directo |
 
-- Limpia `wp_head()` del ruido por defecto (generator, oEmbed, REST API,
-  emoji, feeds...) para que el HTML emitido sea casi idéntico al estático.
+- **Limpia `wp_head()`** del ruido por defecto (generator, oEmbed, REST API, emoji, feeds, wlwmanifest).
+- **Carga styles/scripts vía `wp_enqueue`** con `filemtime()` como versión → cada cambio invalida cache automáticamente.
+- **SEO inline + bypass automático**: emite meta description / OG / Twitter / JSON-LD `RadioStation` en `wp_head`. Si detecta un plugin SEO activo (Yoast / Rank Math / SEOPress / AIOSEO) se silencia para evitar duplicación. En prod corre Rank Math.
+- **Helper `chronos_asset_url($path)`** devuelve URL absoluta del tema + `?v=<filemtime>` para que cambios a imágenes se reflejen sin esperar caches.
+- **`robots.txt` dinámico** con User-agent blocks para bots de entrenamiento IA (GPTBot, ClaudeBot, Google-Extended, PerplexityBot, etc.).
+- **`show_admin_bar` = false** en front (la admin bar no se superpone al hero).
+- **Admin notice** si los permalinks están en "Sencillo" (rompería las rewrites).
 
 ## Estructura
 
 ```
 chronos-iradio/
-├── style.css              ← header obligatorio de tema WP (sin CSS real)
-├── functions.php          ← rewrites, headers, cleanup wp_head
+├── style.css              ← header obligatorio WP + Version: X.Y.Z (sin CSS real)
+├── functions.php          ← rewrites, SEO, enqueue, helper chronos_asset_url
 ├── front-page.php         ← home (clon adaptado de index.html)
-├── index.php              ← fallback (incluye front-page.php)
+├── index.php              ← fallback (incluye front-page)
 ├── templates/
-│   └── player.php         ← clon adaptado de player.html
-├── styles.css             ← CSS real del sitio
-├── app.js                 ← JS del sitio
+│   └── player.php         ← clon adaptado de player.html (/player.html)
+├── styles.css             ← CSS real del sitio (copia sincronizada del upstream)
+├── app.js                 ← JS del sitio (copia sincronizada)
 ├── sw.js                  ← service worker (paths se reescriben al servir)
-├── manifest.json          ← PWA manifest (paths se reescriben al servir)
+├── manifest.json          ← PWA manifest (paths se reescriben al servir + cache-bust)
 ├── humans.txt
-└── assets/                ← imágenes (logo, hero, team, programas, ...)
+├── screenshot.jpg         ← preview del tema en Apariencia → Temas
+└── assets/                ← copia de assets/ del upstream (logo, hero, og, programas, team, ...)
 ```
 
-## Instalación desde wp-admin
+## Instalación / re-deploy desde wp-admin
 
-1. **Crear el ZIP**
-
+1. **Sincronizar** archivos del upstream al tema (si cambiaron en la raíz del repo):
    ```bash
-   cd wp-theme
-   zip -r chronos-iradio.zip chronos-iradio
+   cp ../../styles.css ../../app.js ../../sw.js ../../manifest.json ../../humans.txt .
+   cp -r ../../assets .
    ```
 
-   El ZIP debe contener una carpeta `chronos-iradio/` en la raíz, no los
-   archivos sueltos.
+2. **Bumpear** `Version: X.Y.Z` en `style.css` (sino WP no detecta el upgrade).
 
-2. **Subir y activar**
+3. **Crear el ZIP** desde `wp-theme/`:
+   ```bash
+   cd wp-theme && rm -f chronos-iradio-*.zip
+   zip -r chronos-iradio-X.Y.Z.zip chronos-iradio \
+     -x "*.DS_Store" "*/.git/*" "*/_backup-pre-relogo/*"
+   ```
+   El ZIP debe contener una carpeta `chronos-iradio/` en la raíz.
 
-   - `wp-admin` → **Apariencia → Temas → Añadir nuevo → Subir tema**
-   - Seleccionar `chronos-iradio.zip` → **Instalar ahora** → **Activar**
+4. **Subir y activar**: `wp-admin` → **Apariencia → Temas → Subir tema** → seleccionar ZIP → **Reemplazar el actual** (o Instalar + Activar si es la primera vez).
 
-3. **Configurar permalinks** (crítico para los rewrites)
+5. **Configurar permalinks** (crítico para los rewrites, una sola vez):
+   - `wp-admin` → **Ajustes → Enlaces permanentes** → "Nombre de la entrada" → **Guardar cambios**.
 
-   - `wp-admin` → **Ajustes → Enlaces permanentes**
-   - Elegir cualquier opción **distinta de "Sencillo / Plain"**
-     (recomendado: **"Nombre de la entrada"**).
-   - Guardar cambios. Esto reescribe `.htaccess` y aplica las reglas del tema.
+6. **Configurar la home** (una sola vez):
+   - `wp-admin` → **Ajustes → Lectura → Tu portada muestra** → **"Tus últimas entradas"** (NO "Página estática" para evitar contaminar SEO).
 
-4. **Asegurar que la home sea la del tema**
+7. **Purgar caché de Cloudflare** (si está activo): dashboard de Cloudflare → Caching → Configuration → **Purge Everything**.
 
-   - `wp-admin` → **Ajustes → Lectura**
-   - En **"Tu portada muestra"** dejá **"Tus últimas entradas"** (con eso
-     `front-page.php` ya gana). Si preferís una página estática, creá una
-     página vacía llamada "Inicio" y seleccionala — el resultado es el mismo
-     porque `front-page.php` siempre tiene prioridad.
+8. **Verificar**:
+   ```bash
+   curl -sI https://tudominio.com/                 # 200 text/html
+   curl -sI https://tudominio.com/sw.js            # 200 application/javascript + Service-Worker-Allowed: /
+   curl -sI https://tudominio.com/manifest.json    # 200 application/manifest+json
+   curl -sI https://tudominio.com/player.html      # 200 text/html
+   curl -sI https://tudominio.com/humans.txt       # 200 text/plain
+   ```
 
-5. **Verificar**
+## Configuración recomendada del plugin SEO (Rank Math)
 
-   Abrir en el navegador, una por una:
+Si instalás Rank Math, el tema detecta automáticamente y se silencia. Configurar entonces en `wp-admin → Rank Math → Titles & Meta → Homepage`:
 
-   - `https://tudominio.com/` → debe verse el sitio Chronos iRadio.
-   - `https://tudominio.com/sw.js` → JavaScript del service worker.
-   - `https://tudominio.com/manifest.json` → JSON del manifest.
-   - `https://tudominio.com/player.html` → reproductor fullscreen.
-   - `https://tudominio.com/humans.txt` → texto.
+- **Title**: `Chronos iRadio - Radio Online en Vivo`
+- **Description**: `Los clasicos de la musica de todos los tiempos. Radio online desde Venezuela con rock, pop, soul, jazz y musica latina de los ultimos 50 anos.`
+- **Social Meta Image**: subir `og-banner-clean.jpeg` (1200×630, fondo blanco con logo) o `og-banner-chronos.jpeg` (1080×359, fondo neón).
 
-   En DevTools → **Application → Service Workers** debería figurar
-   `chronos-iradio-v1.4.3` activo con scope `/`.
+Para el `/player.html`, los meta OG están definidos directamente en `templates/player.php` (Rank Math no los toca porque es una URL custom, no una WP page).
+
+## Configuración del icono del sitio
+
+En vez de hardcodear favicons en el tema, se usan los que genera `wp_head()` a partir de **`wp-admin → Ajustes → Generales → Icono del sitio`**. Subir ahí `chronos-iradio-ico-transparente.png` (idealmente 512×512 o mayor) y WP genera automáticamente los crops 32, 192, 180, 270 (msapplication tile) e los inyecta en el HTML.
+
+## Cache-busting automático
+
+A diferencia de versionar a mano cada asset, el tema usa **`filemtime()`** para versionar:
+
+- `wp_enqueue_style('chronos-iradio-main', ..., filemtime(...))` → `styles.css?ver=<timestamp>`.
+- `wp_enqueue_script('chronos-iradio-app', ..., filemtime(...))` → `app.js?ver=<timestamp>`.
+- `chronos_asset_url('assets/logo/chronos-X.png')` → URL absoluta + `?v=<filemtime>`. Se usa para los `<img>` del logo en `front-page.php` y `templates/player.php`.
+- El endpoint `/manifest.json` reescribe cada icon con `?v=<filemtime>` → Android detecta cambio y regenera el WebAPK sin esperar el ciclo de Google Play Services.
+
+Resultado: cuando subís un ZIP nuevo, los browsers y Cloudflare detectan que las URLs cambiaron y bajan los assets nuevos automáticamente. **No necesitás Ctrl+Shift+R manual ni purge selectivo en cada deploy** (salvo casos de bug del SW).
 
 ## Caveats y troubleshooting
 
-- **El service worker no se registra (404 en `/sw.js`)**: re-guardar
-  permalinks. Si persiste, vaciar caché del navegador y desregistrar SWs
-  viejos en DevTools.
-- **El manifest carga pero los iconos rompen**: confirmar que los `.png`
-  existen dentro de `assets/logo/` del tema (este repo trae `.jpg` para
-  favicons pero `.png` para iconos PWA — copiá los originales si no están).
-- **Aparece la admin bar arriba del sitio cuando estás logueado**: es
-  esperado. Cerrá sesión o usá `add_filter('show_admin_bar', '__return_false')`
-  si querés ocultarla siempre.
-- **Plugins inyectan `<style>` o `<script>` que no querés**: la opción menos
-  invasiva es desactivar esos plugins. Si tienen que quedar, ajustar la lista
-  de `remove_action` en `functions.php`.
-- **Hostings con caché agresivo (LiteSpeed, WP Rocket, etc.)**: purgar caché
-  después de cambios en `sw.js` o `manifest.json` para que los headers
-  `no-cache` lleguen al cliente.
+- **404 nativo de Apache en `/sw.js` o `/manifest.json`**: permalinks están en "Sencillo". Cambiar a "Nombre de la entrada" + Guardar. Si persiste, verificar que `.htaccess` exista y tenga las reglas estándar de WP.
+- **301 a `/sw.js/` con trailing slash**: WP `redirect_canonical` está haciéndolo. El tema ya tiene un filter para suprimirlo solo en esas 4 URLs.
+- **WebAPK del celular muestra ícono viejo**: Android cachea el WebAPK ~30 días. Para forzar update: desinstalar PWA → Configuración → Apps → Brave/Chrome → Almacenamiento → Borrar caché → reinstalar PWA desde el browser. Si persiste, también borrar caché de Google Play Services + reiniciar el celular.
+- **Preview de WhatsApp/Telegram cacheado**: WhatsApp cachea previews por días. Compartir el link en un chat distinto, o usar [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) → Scrape Again para invalidar el cache de Meta.
+- **Plugins de cache (LiteSpeed, WP Rocket, etc.)**: purgar caché del plugin después de subir ZIP nuevo.
+- **Service Worker viejo cacheado**: el `VERSION` del SW (`const VERSION` en `sw.js`) tiene que bumpear cuando hay cambios estructurales. Bumpear → al activarse, borra todas las caches anteriores.
+- **`window.CHRONOS_ASSET_BASE` undefined**: significa que `app.js` se cargó sin el inline script que lo define. Confirmar que `front-page.php` / `templates/player.php` tengan el `<script>window.CHRONOS_ASSET_BASE = ...;</script>` ANTES del `wp_footer()` (en el caso del front-page) o del `<script src="app.js">` (en el player).
 
-## Actualizar el tema
+## Helper API de PHP (referencia interna)
 
-Cuando cambies el sitio fuente (raíz del repo), regenerá los archivos del
-tema con los nuevos `styles.css`, `app.js`, `sw.js`, `manifest.json` y
-`assets/`, y vuelve a subir el ZIP desde `wp-admin → Apariencia → Temas →
-Añadir nuevo → Subir tema` (marcando "Reemplazar el tema actual con el
-cargado"). Si hubo cambios en rutas servidas por rewrites, re-guardar
-permalinks.
+```php
+chronos_asset_url( 'assets/logo/chronos-512.png' )
+// → "https://chronosiradio.online/wp-content/themes/chronos-iradio/assets/logo/chronos-512.png?ver=1778893841"
+
+chronos_iradio_seo_plugin_active()
+// → true si Yoast / Rank Math / SEOPress / AIOSEO están activos
+```
+
+## Versiones
+
+Ver `CHANGELOG.md` en la raíz del repo. Las versiones del tema (header `Version:` en `style.css`) y las del proyecto pueden divergir: el tema bumpea con cada deploy a WP, el proyecto en cambios funcionales.

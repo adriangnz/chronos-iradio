@@ -2,142 +2,165 @@
 
 Sitio web moderno y responsive para [Chronos iRadio](https://chronosiradio.online/), una radio online desde Venezuela.
 
+El proyecto está diseñado para **dos targets de despliegue** desde la misma fuente:
+
+1. **Estático** — el repo raíz se sirve tal cual (Caddy, GitHub Pages, cualquier servidor de archivos).
+2. **Tema WordPress** — `wp-theme/chronos-iradio/` empaqueta el sitio como tema instalable desde `wp-admin`. **Es lo que corre en producción.**
+
 ## Características
 
-- Diseño oscuro moderno con acentos en gradiente azul/púrpura/rosa
-- Reproductor de radio integrado (OnlineRadioBox widget) fijo en el footer
-- Sección de programación estilo cronograma
-- Sección de equipo con modal animado y tarjetas siblings prev/next
-- Totalmente responsive (desktop, tablet, móvil)
-- Animaciones de scroll (fade-up con IntersectionObserver)
-- Navbar con efecto glass/blur al hacer scroll
-- Zero dependencias — HTML + CSS + JS vanilla
-- SEO optimizado (Open Graph, Twitter Cards, JSON-LD, sitemap.xml, robots.txt, geo meta)
-- Imágenes locales (`assets/`) en WebP con `width`/`height`/`decoding=async` y `preload`/`fetchpriority` para LCP
-- Compatible con apertura directa vía `file://` (patch automático de protocol-relative URLs)
+- Diseño oscuro moderno con acentos en gradiente azul/púrpura/rosa.
+- Reproductor de radio integrado (OnlineRadioBox widget) fijo en el footer + fullscreen player con cover dinámico (lee el `iImg` del widget).
+- PWA instalable: manifest, service worker con cache offline, página standalone `/player.html`, splash con ícono colorido sobre fondo oscuro.
+- Modal "WhatsApp Choice" en el botón verde del player: opción "Cabina virtual" (grupo) vs "Canal" (broadcast).
+- Botón **Share** en el header del player: Web Share API nativa (WhatsApp/Telegram/etc.) con fallback a clipboard + toast.
+- Sección de programación tipo cronograma.
+- Sección de equipo con modal animado (origen desde la tarjeta) y tarjetas siblings prev/next con preview desenfocado.
+- Totalmente responsive (desktop, tablet, móvil).
+- Animaciones de scroll (fade-up con IntersectionObserver).
+- Navbar con efecto glass/blur al hacer scroll.
+- Zero dependencias en runtime — HTML + CSS + JS vanilla.
+- SEO optimizado (Open Graph, Twitter Cards, JSON-LD `RadioStation`, sitemap, robots con opt-out de bots IA, geo meta).
+- Imágenes locales en WebP/PNG/JPG según corresponda, con `width`/`height`/`decoding="async"` y `preload`/`fetchpriority="high"` en el LCP.
+- Compatible con apertura directa vía `file://` (patch automático de protocol-relative URLs del widget).
 
 ## Estructura del repo
 
 ```
-index.html        — HTML principal
-styles.css        — Estilos (extraídos del inline)
-app.js            — Lógica cliente (defer)
-manifest.json     — PWA manifest
-robots.txt        — Reglas para crawlers
-sitemap.xml       — Sitemap para motores de búsqueda
-humans.txt        — Créditos del equipo
-Caddyfile         — Configuración del servidor
-CHANGELOG.md      — Historial de versiones
+index.html              — HTML principal (home)
+player.html             — Reproductor PWA standalone (/player.html)
+styles.css              — Estilos
+app.js                  — Lógica cliente (incluye ASSET_BASE para compatibilidad con WP)
+sw.js                   — Service worker (cache + offline)
+manifest.json           — PWA manifest
+robots.txt              — Reglas para crawlers + opt-out IA
+sitemap.xml             — Sitemap con image extension
+humans.txt              — Créditos del equipo
+Caddyfile               — Servidor estático local
+CHANGELOG.md            — Historial de versiones
+README.md               — Este archivo
+CLAUDE.md               — Contexto persistente para Claude Code
+.gitignore              — Excluye backups locales y artifacts del tema
+
 assets/
-├── logo/         — Favicons y logo (32/180/192)
-├── hero/         — Banner del hero
-├── og/           — Imagen Open Graph
-├── programas/    — Banners de programas (WebP)
-├── team/         — Fotos del equipo (WebP)
-└── aniversario/  — Banner del aniversario (WebP)
+├── logo/               — Favicons (JPG) + PWA icons (PNG, varios tamaños)
+├── hero/               — Banner del hero
+├── og/                 — Open Graph images (clean = fondo blanco con logo, banner = neón)
+├── programas/          — Banners de programas (WebP)
+├── team/               — Fotos del equipo (WebP)
+└── aniversario/        — Banner del aniversario (WebP)
+
+wp-theme/chronos-iradio/    — Tema WordPress (lo que se zipea y sube a wp-admin)
+├── style.css               — Header de tema WP + versión
+├── functions.php           — Rewrites PWA, SEO meta, cache-bust filemtime, helpers
+├── front-page.php          — Home (clon adaptado de index.html)
+├── templates/player.php    — Render de /player.html
+├── README.md               — Instrucciones específicas del tema
+└── (copia sincronizada de styles.css, app.js, sw.js, manifest.json, assets/)
 ```
 
-## Ejecutar localmente
+## Ejecutar localmente (estático)
 
 ### Opción 1: Caddy (recomendado)
 
-Caddy trae compresión, security headers y cache policies listas en el `Caddyfile`.
+Caddy trae compresión, security headers y cache policies en el `Caddyfile`.
 
 ```bash
-# Instalar caddy (Ubuntu/Debian)
-sudo apt install caddy
-# o descargar el binario desde https://caddyserver.com/download
-
-# Desde la raíz del repo:
+sudo apt install caddy  # Ubuntu/Debian
 caddy run --config Caddyfile --adapter caddyfile
 ```
 
-El sitio queda expuesto en `http://0.0.0.0:8080/` — accesible desde:
-- Localmente: `http://localhost:8080/`
-- LAN: `http://<tu-IP>:8080/` (usa `hostname -I` para ver tu IP)
+Expuesto en `http://0.0.0.0:8080/`.
 
-### Opción 2: Python http.server (fallback)
-
-Sin instalar nada:
+### Opción 2: Python http.server
 
 ```bash
 python3 -m http.server 8080 --bind 0.0.0.0
 ```
 
-Mismo puerto, sin compresión ni cache headers.
+### Probar el tema WP en local
 
-### Exponer a internet
-
-Una vez el sitio escucha en `0.0.0.0:8080`, puedes usar cualquier túnel:
+Si tenés [Local by Flywheel](https://localwp.com/) u otro stack WP, podés symlinkear el tema:
 
 ```bash
-# Cloudflared (quick tunnel, URL temporal)
-cloudflared tunnel --url http://localhost:8080
-
-# ngrok
-ngrok http 8080
-
-# Tailscale Funnel (si ya usas tailnet)
-tailscale funnel 8080
+ln -s "$(pwd)/wp-theme/chronos-iradio" "/path/to/Local Sites/<sitio>/app/public/wp-content/themes/chronos-iradio"
 ```
 
-Si tu firewall local está activo (`ufw`), abre el puerto en LAN:
+Después en wp-admin del sitio Local → Apariencia → Temas → activar "Chronos iRadio" + Ajustes → Enlaces permanentes → "Nombre de la entrada" → Guardar.
 
-```bash
-sudo ufw allow from 192.168.0.0/16 to any port 8080
-```
+## Deploy a WordPress (producción)
 
-## Deploy a GitHub Pages
+Producción corre en `https://chronosiradio.online/` con hosting que solo da acceso a `wp-admin` (sin FTP/SSH). El flujo es:
 
-Hay un workflow en `.github/workflows/deploy.yml` que publica el sitio automáticamente en cada push a `master`.
+1. **Sincronizar** los archivos del repo raíz al tema (si cambiaron):
+   ```bash
+   cp styles.css app.js sw.js manifest.json humans.txt wp-theme/chronos-iradio/
+   cp -r assets wp-theme/chronos-iradio/
+   ```
+2. **Bumpear** `Version:` en `wp-theme/chronos-iradio/style.css`.
+3. **Generar ZIP** desde `wp-theme/`:
+   ```bash
+   cd wp-theme && rm -f chronos-iradio-*.zip
+   zip -r chronos-iradio-X.Y.Z.zip chronos-iradio \
+     -x "*.DS_Store" "*/.git/*" "*/_backup-pre-relogo/*"
+   ```
+4. **wp-admin → Apariencia → Temas → Subir tema** → ZIP → **Reemplazar el actual**.
+5. **Cloudflare** dashboard (`dash.cloudflare.com`) → Caching → **Purge Everything**.
+6. (Si cambió código JS / SW) → limpiar cache del browser; para PWA en celular: desinstalar + clear cache del browser + reinstalar.
+
+Para más detalle, ver `wp-theme/chronos-iradio/README.md`.
+
+## Deploy a GitHub Pages (estático)
+
+Workflow en `.github/workflows/deploy.yml` publica en cada push a `master`. Excluye `wp-theme/`, `CLAUDE.md`, `CHANGELOG.md`, `Caddyfile`, `.claude/`.
 
 ### Activación (una sola vez)
 
-1. Push del repo a GitHub: `git remote add origin git@github.com:<usuario>/<repo>.git && git push -u origin master --tags`
-2. En el repo en GitHub → **Settings → Pages**.
-3. En **Build and deployment → Source**, elige **GitHub Actions** (no "Deploy from a branch").
-4. El próximo push a `master` (o un `workflow_dispatch` manual desde la pestaña Actions) dispara el deploy.
-
-La URL final aparece como output del job y en Settings → Pages una vez completado el primer deploy (normalmente `https://<usuario>.github.io/<repo>/`).
-
-### Qué sube el workflow
-
-El step **Prepare artifact directory** copia la raíz del repo a `_site/` excluyendo archivos que no deben servirse públicamente: `.git`, `.github`, `CLAUDE.md`, `CHANGELOG.md`, `Caddyfile`, `.claude`. Añade un `.nojekyll` para que Pages no intente procesar el sitio con Jekyll.
-
-### Notas
-
-- Las rutas del sitio son **relativas** (`styles.css`, `assets/...`) para que funcione tanto en user page (`usuario.github.io`) como en project page (`usuario.github.io/repo/`).
-- Los canonical URLs y OG tags apuntan a `chronosiradio.online`. Si quieres que Google indexe la versión de GitHub Pages en vez del dominio principal, tendrás que editar `<link rel="canonical">`, `og:url` y el sitemap.
-- GitHub Pages no soporta los security headers del `Caddyfile`. Para el deploy GH Pages sirve los headers por defecto; si necesitas CSP/HSTS custom, considera Cloudflare Pages o ponerle un Cloudflare proxy delante.
+1. Repo en GitHub → **Settings → Pages → Build and deployment → Source**: **GitHub Actions**.
+2. Próximo push a `master` dispara el deploy. La URL queda en Settings → Pages.
 
 ## Desarrollo
 
 ### Convenciones
 
-- **Commits**: [Conventional Commits](https://www.conventionalcommits.org/es/v1.0.0/) — `feat`, `fix`, `docs`, `chore`, `refactor`, `style`, con scope opcional (`feat(seo): ...`).
-- **Versionado**: [Semantic Versioning](https://semver.org/lang/es/) con tags git (`vX.Y.Z`).
+- **Commits**: [Conventional Commits](https://www.conventionalcommits.org/es/v1.0.0/) — `feat`, `fix`, `docs`, `chore`, `refactor`, con scope opcional (`feat(player): ...`).
+- **Versionado**: [Semantic Versioning](https://semver.org/) con tags git (`vX.Y.Z`).
 - **Changelog**: `CHANGELOG.md` en formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
+- **Tema WP**: además del semver de proyecto, el header `Version:` de `style.css` se bumpea **cada deploy** a WP (caso contrario WP no detecta el upgrade).
+- **Service Worker**: `const VERSION` se bumpea **solo cuando hay cambios estructurales** en la cache strategy o el SHELL.
 
 ### Release flow
 
 1. Consolidar cambios en `master`.
-2. Actualizar `CHANGELOG.md`: mover entradas de `[Unreleased]` a una nueva sección `[vX.Y.Z] - YYYY-MM-DD`.
+2. Actualizar `CHANGELOG.md`: mover entradas de `[Unreleased]` a `[vX.Y.Z] - YYYY-MM-DD`.
 3. Commit: `chore(release): vX.Y.Z`.
 4. Tag anotado: `git tag -a vX.Y.Z -m "vX.Y.Z - título breve"`.
 5. Push: `git push && git push --tags`.
 
+### Regenerar logos / iconos PWA
+
+Los logos se generan con ImageMagick desde los archivos fuente en `~/Descargas/chronos-iradio-{ico,logo}-{transparente,blanco}.png` (2362×2362). Ver `CLAUDE.md` → sección "Regenerar logos" para la tabla con specs y comandos exactos. Usar siempre `-filter Lanczos` para mejor calidad de downscaling.
+
+### Sincronización con el tema
+
+Cuando edites cualquier archivo de la raíz (`app.js`, `styles.css`, `sw.js`, `manifest.json`, `index.html`, `player.html`, `assets/`), el cambio NO se refleja automáticamente en el tema. Tenés que copiar al `wp-theme/chronos-iradio/` antes del próximo deploy.
+
 ## Secciones del sitio
 
-- **Hero** — Banner principal con logo animado y CTAs
-- **Programas** — Cronograma con 4 programas: Navegando entre Décadas, Chronos iCom, Top 5, Mundo Marino
-- **Equipo** — Grid de 5 miembros con modal interactivo y navegación por teclado
-- **Aniversario** — Banner del 1er aniversario
-- **Contacto** — Enlaces a WhatsApp, Instagram, Canal WhatsApp, Telegram
-- **Reproductor** — Widget OnlineRadioBox fixed en el footer
+- **Hero** — Banner principal con logo animado y CTAs.
+- **Programas** — Cronograma con 4 programas: Navegando entre Décadas, Chronos iCom, Top 5, Mundo Marino.
+- **Equipo** — Grid de 5 miembros con modal interactivo y navegación por teclado.
+- **Aniversario** — Banner del 1er aniversario.
+- **Contacto** — Enlaces a WhatsApp directo, Instagram, Canal WhatsApp, Telegram.
+- **Reproductor barra fija** — Widget OnlineRadioBox en el footer (siempre visible).
+- **Fullscreen player** — Modal con cover dinámico, controles grandes, share, install PWA, modal WhatsApp Choice.
+- **`/player.html`** — Misma experiencia que el fullscreen player pero como página standalone (PWA `start_url`).
 
 ## Tecnologías
 
-- HTML5, CSS3, JavaScript vanilla (sin build)
-- Google Fonts (Inter, Space Grotesk)
-- OnlineRadioBox Widget para streaming
-- Caddy como servidor HTTP (opcional)
+- HTML5, CSS3, JavaScript vanilla (sin build).
+- Google Fonts (Inter, Space Grotesk).
+- OnlineRadioBox Widget para streaming.
+- Service Worker para PWA / offline.
+- WordPress + Rank Math (en producción).
+- Cloudflare como CDN/proxy.

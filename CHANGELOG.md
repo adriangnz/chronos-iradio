@@ -7,6 +7,62 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-15
+
+### Añadido
+
+- **Tema WordPress** completo en `wp-theme/chronos-iradio/`. Empaqueta el sitio como tema instalable desde `wp-admin → Apariencia → Temas → Subir tema`. Es lo que corre en producción en `https://chronosiradio.online/`.
+  - `functions.php` registra rewrites para servir `/sw.js`, `/manifest.json`, `/player.html` y `/humans.txt` desde la raíz del dominio, aunque vivan dentro del tema.
+  - `Service-Worker-Allowed: /` header en `/sw.js` para mantener scope completo de la PWA.
+  - Filter `redirect_canonical` que evita el 301 a `/sw.js/` (trailing slash) que rompía las rules.
+  - Filter `chronos_iradio_seo_plugin_active()` que detecta Yoast / Rank Math / SEOPress / AIOSEO y silencia los meta SEO del tema para evitar duplicación.
+  - Helper `chronos_asset_url($path)` con cache-bust por `filemtime()`. Cualquier cambio a una imagen invalida el cache de browser y Cloudflare automáticamente en el próximo deploy.
+  - Cache-bust automático en los iconos del `/manifest.json` con `?v=<filemtime>` → fuerza a Android a regenerar el WebAPK con el icono nuevo sin esperar el ciclo de ~30 días de Google Play Services.
+  - `wp_enqueue_style`/`script` para `styles.css` y `app.js` con versión `filemtime()`. Compatible con plugins de cache.
+  - `script_loader_tag` filter aplica `defer` a `app.js`.
+  - `wp_resource_hints` filter agrega preconnect a Google Fonts + dns-prefetch a OnlineRadioBox.
+  - `robots_txt` filter agrega User-agent blocks para bots de IA (GPTBot, ChatGPT-User, ClaudeBot, Google-Extended, PerplexityBot, etc.).
+  - `show_admin_bar` deshabilitada en front.
+  - Admin notice rojo si permalinks están en "Sencillo".
+  - `screenshot.jpg` (1200×900) como preview del tema en `Apariencia → Temas`.
+- **Modal "WhatsApp Choice"** en el botón verde del fullscreen player: muestra 2 opciones — "Cabina virtual" (grupo) y "Canal de WhatsApp" (broadcast).
+- **Botón Share** en el header del player (`.fsp-share`): Web Share API con sheet nativo del SO (WhatsApp/Telegram/Twitter/mail) + fallback a clipboard con toast "Link copiado al portapapeles". URL compartida: `https://chronosiradio.online/player.html`.
+- **Wrapper `.fsp-actions`** agrupa share + install en el header con `gap` (antes quedaban distribuidos por el `space-between`).
+- **`chronos-1024.png`** (1024×1024 PNG transparente) para que el splash de la PWA muestre el ícono sobre el `background_color: #0a0a0f` del manifest, sin recuadro blanco.
+- **`chronos-maskable-1024.png`** (1024×1024, fondo blanco, safe area 70%) para alta resolución del launcher icon en Android Adaptive Icons.
+- **`og-banner-clean.jpeg`** (1200×630, fondo blanco con logo Chronos + texto centrado) para el preview de WhatsApp/Telegram del `/player.html`. Mejora notable vs el banner neón (que perdía el logo).
+- **Meta `og:*` y `twitter:*`** en `/player.html` (template del tema y `player.html` upstream). Antes WhatsApp caía al favicon escalado y se veía pixelado.
+- `chronos-logo-full.png` (logo + texto) como asset de reserva para futuros usos (redes sociales, share image, etc.).
+
+### Cambiado
+
+- **Nuevo ícono de Chronos** (regenerado desde el archivo fuente colorido). Los 6 logos (32, 180, 192 JPG; 192, 512, maskable PNG) se regeneraron con ImageMagick filtro Lanczos para mejor calidad de downscaling.
+- **`chronos-512.png`** ahora con fondo blanco (antes transparente). Se usa como cover del fullscreen player.
+- **`chronos-maskable.png`** con fondo blanco + safe area 70% (antes 80% sobre fondo oscuro). Android Adaptive Icon estándar.
+- **`chronos-512.png`** reemplazó a `chronos-192.jpg` en los `<img>` del logo del navbar, hero y cover del player → más nítido y sin fondo blanco pixelado sobre dark.
+- `app.js` adaptado para multi-target: nueva constante `ASSET_BASE = window.CHRONOS_ASSET_BASE || ''` que prefija paths de assets. En modo estático queda `''` (sin cambios); en WP, el template inyecta la URL del tema antes de cargar el script.
+- `app.js`: `LOCAL_LOGO` apunta a `chronos-512.png` (antes `chronos-192.jpg`); las entries de `mediaSession.metadata.artwork` también usan `ASSET_BASE`.
+- Botón WhatsApp del player ahora es `<button>` con `onclick="openWhatsAppChoice()"` en vez de `<a href>` directo al canal.
+- `og-banner-chronos.jpeg` (1080×359 neón) queda como banner alternativo para el home; el `/player.html` y otros previews usan el `og-banner-clean.jpeg` (1200×630 fondo blanco) más limpio.
+- `front-page.php` simplificado: meta SEO, JSON-LD, preload, resource hints y stylesheets ahora los emite `wp_head()` desde `functions.php` (no inline en el template). El template queda enfocado al markup del body.
+
+### Corregido
+
+- WordPress hacía 301 a `/sw.js/` antes de que el rewrite del tema pudiera servir el archivo. Filter `redirect_canonical` específico para nuestras 4 URLs lo evita.
+- Cuando WP detecta una página estática como home y un plugin SEO está activo, los meta tags se duplicaban con basura como `article:published_time` y `twitter:label1: Escrito por`. Ahora con la home en "Tus últimas entradas" + el detector del tema, no hay duplicación.
+- Service Worker vieja cacheaba el HTML/JS antes de que llegara la versión nueva. `const VERSION` del SW bumpeado a `chronos-iradio-v1.5.0` (era `v1.4.3`) → al activarse purga todas las caches anteriores.
+- Botón WhatsApp del fullscreen player no funcionaba en `/player.html` por falta de cache-bust en el `<script src="app.js">` directo del template. Ahora usa `chronos_asset_url('app.js')` con `?v=<filemtime>`.
+
+### Eliminado
+
+- En producción WP: plugins innecesarios desinstalados (Elementor + addons, MetaSlider, Mosaic Gallery, Radio Player, Akismet, Kirki). Solo quedan **Limit Login Attempts Reloaded** + **Rank Math SEO**.
+
+### Infraestructura / Producción
+
+- Migrado de hosting estático a WordPress (cliente solo tenía acceso a wp-admin). Tema completo reemplaza el sitio anterior, sin perder funcionalidad (PWA, SEO, share, etc.).
+- **Rank Math SEO** instalado y configurado en wp-admin para manejar title/description/OG/sitemap del home y `/player.html`.
+- Site Icon (Ajustes → Generales → Icono del sitio) configurado con el ícono nuevo → WP genera crops automáticos.
+
 ## [1.0.0] - 2026-04-18
 
 ### Añadido
@@ -76,7 +132,8 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 - Animaciones fade-up con IntersectionObserver.
 - Patch de URLs protocol-relative para compatibilidad con `file://`.
 
-[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.0.0...v1.2.0
 [1.0.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v0.3.0...v1.0.0
 [0.3.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v0.1.0...v0.2.0
