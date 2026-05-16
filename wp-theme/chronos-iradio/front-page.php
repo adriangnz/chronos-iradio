@@ -87,10 +87,6 @@ $HOME = trailingslashit( home_url( '/' ) );
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     Ver Programas
                 </a>
-                <button type="button" class="btn btn-ghost" id="heroInstallBtn" data-install-cta onclick="installApp()" hidden>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-                    Instalar app
-                </button>
             </div>
         </div>
     </section>

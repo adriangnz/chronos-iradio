@@ -7,6 +7,13 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.3.4] - 2026-05-16
+
+### Eliminado
+
+- **Botón "Instalar app" del hero** removido. La detección de standalone vía `display-mode` resultó poco confiable en Chrome (el botón seguía apareciendo dentro de la PWA instalada incluso después de cubrir `minimal-ui` y `window-controls-overlay`). El smart banner inferior + el botón install del fullscreen player son suficientes para invitar a instalar.
+- Estilo `.btn-ghost` eliminado del CSS (solo lo usaba este botón).
+
 ## [1.3.3] - 2026-05-16
 
 ### Corregido
@@ -196,7 +203,8 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 - Animaciones fade-up con IntersectionObserver.
 - Patch de URLs protocol-relative para compatibilidad con `file://`.
 
-[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.3...HEAD
+[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.4...HEAD
+[1.3.4]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.0...v1.3.1
