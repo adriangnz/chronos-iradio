@@ -801,6 +801,41 @@ function installApp() {
     });
 }
 
+// ===== SHARE (Web Share API + fallback clipboard) =====
+function _showToast(msg) {
+    let toast = document.getElementById('shareToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'shareToast';
+        toast.className = 'share-toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.add('visible');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.classList.remove('visible'), 2500);
+}
+
+async function shareApp() {
+    const data = {
+        title: 'Chronos iRadio',
+        text: 'Escuchá Chronos iRadio en vivo:',
+        url: 'https://chronosiradio.online/player.html'
+    };
+    if (navigator.share && (!navigator.canShare || navigator.canShare(data))) {
+        try { await navigator.share(data); } catch (e) { /* cancelado */ }
+        return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+            await navigator.clipboard.writeText(data.url);
+            _showToast('Link copiado al portapapeles');
+            return;
+        } catch (e) { /* sigue al fallback final */ }
+    }
+    _showToast('No se pudo compartir');
+}
+
 // ===== WHATSAPP CHOICE MODAL =====
 function openWhatsAppChoice() {
     const el = document.getElementById('waChoice');

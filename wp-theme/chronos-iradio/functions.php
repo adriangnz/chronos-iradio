@@ -151,7 +151,9 @@ add_action( 'template_redirect', function () {
                 "'./app.js'"                                 => "'" . $theme_uri . "app.js'",
                 "'./assets/logo/chronos-192.png'"            => "'" . $theme_uri . "assets/logo/chronos-192.png'",
                 "'./assets/logo/chronos-512.png'"            => "'" . $theme_uri . "assets/logo/chronos-512.png'",
+                "'./assets/logo/chronos-1024.png'"           => "'" . $theme_uri . "assets/logo/chronos-1024.png'",
                 "'./assets/logo/chronos-maskable.png'"       => "'" . $theme_uri . "assets/logo/chronos-maskable.png'",
+                "'./assets/logo/chronos-maskable-1024.png'"  => "'" . $theme_uri . "assets/logo/chronos-maskable-1024.png'",
                 "'./assets/hero/banner-chronos.jpeg'"        => "'" . $theme_uri . "assets/hero/banner-chronos.jpeg'",
             ) );
             echo $sw;

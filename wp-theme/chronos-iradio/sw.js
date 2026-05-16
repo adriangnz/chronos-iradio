@@ -7,7 +7,7 @@
 //   - /assets/**   → stale-while-revalidate (rápido + actualiza background)
 //   - cross-origin (stream/widget/fonts) → passthrough, no se toca
 
-const VERSION = 'chronos-iradio-v1.4.3';
+const VERSION = 'chronos-iradio-v1.5.0';
 const SHELL = [
     './',
     './index.html',
@@ -16,7 +16,9 @@ const SHELL = [
     './app.js',
     './assets/logo/chronos-192.png',
     './assets/logo/chronos-512.png',
+    './assets/logo/chronos-1024.png',
     './assets/logo/chronos-maskable.png',
+    './assets/logo/chronos-maskable-1024.png',
     './assets/hero/banner-chronos.jpeg'
 ];
 

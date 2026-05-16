@@ -32,7 +32,7 @@ $HOME = trailingslashit( home_url( '/' ) );
     <link rel="dns-prefetch" href="https://ecdn.onlineradiobox.com">
     <link rel="preload" as="image" href="<?php echo esc_url( $T . 'assets/logo/chronos-192.png' ); ?>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo esc_url( $T . 'styles.css' ); ?>">
+    <link rel="stylesheet" href="<?php echo esc_url( chronos_asset_url( 'styles.css' ) ); ?>">
 </head>
 <body class="player-only">
 
@@ -43,9 +43,14 @@ $HOME = trailingslashit( home_url( '/' ) );
             <div class="fsp-top">
                 <span style="width:44px;" aria-hidden="true"></span>
                 <span class="fsp-label">Reproduciendo ahora</span>
-                <button type="button" id="installApp" class="fsp-install" onclick="installApp()" aria-label="Instalar como app" hidden>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-                </button>
+                <div class="fsp-actions">
+                    <button type="button" class="fsp-install fsp-share" onclick="shareApp()" aria-label="Compartir Chronos iRadio">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    </button>
+                    <button type="button" id="installApp" class="fsp-install" onclick="installApp()" aria-label="Instalar como app" hidden>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                    </button>
+                </div>
             </div>
 
             <div class="fsp-cover">
@@ -140,6 +145,6 @@ $HOME = trailingslashit( home_url( '/' ) );
     </div>
 
     <script>window.CHRONOS_ASSET_BASE = <?php echo wp_json_encode( $T ); ?>;</script>
-    <script src="<?php echo esc_url( $T . 'app.js' ); ?>" defer></script>
+    <script src="<?php echo esc_url( chronos_asset_url( 'app.js' ) ); ?>" defer></script>
 </body>
 </html>

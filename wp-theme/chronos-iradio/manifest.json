@@ -28,8 +28,20 @@
             "purpose": "any"
         },
         {
+            "src": "assets/logo/chronos-1024.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
             "src": "assets/logo/chronos-maskable.png",
             "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "assets/logo/chronos-maskable-1024.png",
+            "sizes": "1024x1024",
             "type": "image/png",
             "purpose": "maskable"
         }
