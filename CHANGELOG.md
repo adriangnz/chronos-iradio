@@ -7,6 +7,42 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-05-16
+
+### Añadido
+
+- **CTA "Instalar app" en la home** con 3 puntos de entrada coordinados:
+  - **Botón hero** (`.btn-ghost` azul) junto a "Escuchar en Vivo" y "Ver Programas". Aparece solo si la PWA es instalable y no está ya instalada.
+  - **Smart banner inferior** glass-dark + acento azul (encima de la player-bar, debajo del fullscreen player). Aparece a los 6s con CTA "Instalar" + cierre `×`. Persiste el dismiss en `localStorage` por **14 días**. Se oculta automáticamente al evento `appinstalled` o cuando el fullscreen player está activo.
+  - **Botón install en fullscreen player** (ya existente) ahora sincronizado con la misma lógica vía `data-install-cta`.
+- **Modal "iOS Install Hint"** para Safari en iPhone/iPad (que no soporta `beforeinstallprompt`): cualquiera de los 3 CTAs anteriores abre un mini-modal con instrucciones de 3 pasos ("Toca Compartir → Agregar a inicio → Agregar").
+- **Refactor de install logic** en `app.js`: helpers `_isIOSSafari()`, `_isStandalone()`, `_canInstall()`, `_refreshInstallUI()`, `tryShowInstallBanner()`, `dismissInstallBanner()`, `showIosInstallHint()`. El selector `[data-install-cta]` permite agregar más botones en el futuro sin tocar JS.
+- **Estilo `.btn-ghost`** — variante de botón hero con fondo azul translúcido + borde, para CTAs secundarios sutiles.
+
+### Cambiado
+
+- **PWA `start_url`** ahora apunta a `./#player` en vez de `./player.html`. Al abrir la app instalada se monta la home completa con el reproductor desplegado por defecto, dando acceso al resto del contenido (programas, equipo, contacto) sin salir de la PWA.
+- **`shortcuts[0].url`** del manifest también pasa a `./#player` por consistencia.
+- **Sección Equipo con 2 estados (estilo "HTTP 203")**:
+  - **Estado A (default)**: grid de 4 cards como antes (Km, Eryx, Enrique, Victor).
+  - **Estado B (detail)**: click en una card → la card "crece" a un layout preview grande izquierda + lista vertical de thumbnails derecha, con botón "Volver" arriba. Cambio entre miembros con thumbs sin salir del detail. ESC desde un thumb vuelve al grid.
+  - El modal viejo fue eliminado.
+  - Mobile: grid 2×2; en detail el preview va arriba y los thumbs se vuelven scroll horizontal circular.
+  - Navegación teclado: Tab por cards, Enter abre detail; en detail ↑↓←→ navega entre thumbs, Home/End, ESC vuelve al grid.
+- **Apertura/cierre del fullscreen player (#player)** usa ahora **View Transition API** (`document.startViewTransition`) con el **botón `.player-expand` del player bar inferior** como origen visual. El chevron-up "crece" hasta convertirse en el fullscreen player; al cerrar se "encoge" de vuelta al bar. Fallback graceful: en Safari/Firefox sin soporte cae al comportamiento anterior (slide-up + crossfade CSS).
+- **Switch entre cards/thumbs del equipo** también usa View Transition: la card o thumb clickeado "vuela" a la posición del preview. El `view-transition-name: team-hero` se asigna al **contenedor `.team-preview-photo`** (con el gradient overlay incluido) en vez del `<img>`, evitando un flash sin overlay al final de la animación.
+
+### Corregido
+
+- El fullscreen player (`#player`) ya no se cierra al hacer clic en cualquier zona del fondo. El cierre queda restringido al botón chevron-down (`.fsp-close`) en el header y a la tecla `ESC` en desktop. Antes un clic accidental en el backdrop bajaba el reproductor y mostraba la home detrás.
+- **Modal "WhatsApp Choice"**: al hacer clic en una de las opciones (Cabina virtual o Canal de WhatsApp) ahora también cierra el modal. Antes quedaba abierto encima del fullscreen player tras abrir la opción en una nueva pestaña. Aplica a `index.html`, `player.html`, `front-page.php` y `templates/player.php`.
+
+### Eliminado
+
+- **Modal del equipo** (`.modal-backdrop` + `.modal-card` + `.modal-sibling`) eliminado completamente. Reemplazado por el nuevo layout `.team-stage`. Se removieron también las funciones `openModal()`, `closeModal()`, `navigateModal()` y el handler de swipe (`attachModalSwipe()`) en `app.js`, junto con los handlers de keydown ↔/Escape específicos del modal. Total: ~80 líneas de JS + ~165 líneas de CSS eliminadas.
+- **Estilos `.team-card*`** (overlay, hint, border, hover) eliminados — los thumbnails del nuevo layout usan `.team-thumb`.
+- **Franmary Fernandez** removida completamente del proyecto: `teamData` en `app.js` (raíz + tema), markup de `index.html` y `front-page.php`, `JSON-LD` `RadioStation.employee` en `index.html` y `functions.php`, y el asset `assets/team/franmary-fernandez.webp` borrado de raíz y del tema. Tras la eliminación, Victor Grinfelds pasa al índice `3` del modal y a `stagger-4`.
+
 ## [1.2.0] - 2026-05-15
 
 ### Añadido
@@ -132,7 +168,8 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 - Animaciones fade-up con IntersectionObserver.
 - Patch de URLs protocol-relative para compatibilidad con `file://`.
 
-[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.0.0...v1.2.0
 [1.0.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v0.3.0...v1.0.0
 [0.3.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v0.2.0...v0.3.0

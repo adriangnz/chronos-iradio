@@ -26,12 +26,6 @@ const teamData = [
         desc: 'Nuestra voz marca, con un talento increible es el que le imprime la personalidad y la imagen a Chronos iRadio. Ademas complice en esta aventura que conduce a un sueno.'
     },
     {
-        name: 'Franmary Fernandez',
-        role: 'Locutora',
-        img: ASSET_BASE + 'assets/team/franmary-fernandez.webp',
-        desc: 'Una de las voces que escuchas en Chronos iRadio. Una voz calida sobria con unos matices grandiosos. Licenciada en Comunicacion Social.'
-    },
-    {
         name: 'Victor Grinfelds',
         role: 'Ingeniero',
         img: ASSET_BASE + 'assets/team/victor-grinfelds.webp',
@@ -39,168 +33,206 @@ const teamData = [
     }
 ];
 
-// ===== MODAL WITH ORIGIN ANIMATION =====
-let activeCardIdx = null;
+// ===== EQUIPO — Estados: grid (A) ↔ detail (B). View Transition entre cards y preview =====
+let activeTeamIdx = null;
+const _TEAM_VT_NAME = 'team-hero';
 
-function getCardEl(idx) {
-    return document.querySelectorAll('.team-card')[idx];
+function _renderTeamThumbs() {
+    const thumbs = document.getElementById('teamThumbs');
+    if (!thumbs) return;
+    thumbs.innerHTML = teamData.map((m, i) => `
+        <button type="button" class="team-thumb${i === activeTeamIdx ? ' active' : ''}" data-team-idx="${i}" role="tab" aria-selected="${i === activeTeamIdx}" aria-controls="teamPreview" tabindex="${i === activeTeamIdx ? '0' : '-1'}">
+            <img src="${m.img}" alt="${m.name}" width="80" height="100" loading="lazy" decoding="async">
+            <span class="team-thumb-info">
+                <strong>${m.name}</strong>
+                <em>${m.role}</em>
+            </span>
+        </button>
+    `).join('');
 }
 
-function updateSiblings(idx) {
-    const prevIdx = (idx - 1 + teamData.length) % teamData.length;
-    const nextIdx = (idx + 1) % teamData.length;
-    const prev = teamData[prevIdx];
-    const next = teamData[nextIdx];
-
-    document.getElementById('siblingPrevImg').src = prev.img;
-    document.getElementById('siblingPrevImg').alt = prev.name;
-    document.getElementById('siblingPrevName').textContent = prev.name;
-    document.getElementById('siblingPrevRole').textContent = prev.role;
-
-    document.getElementById('siblingNextImg').src = next.img;
-    document.getElementById('siblingNextImg').alt = next.name;
-    document.getElementById('siblingNextName').textContent = next.name;
-    document.getElementById('siblingNextRole').textContent = next.role;
-
-    // Position siblings based on modal position
-    const vw = window.innerWidth;
-    const modalW = Math.min(700, vw * 0.9);
-    const sideSpace = (vw - modalW) / 2;
-    const siblingW = 240;
-    const prevEl = document.getElementById('siblingPrev');
-    const nextEl = document.getElementById('siblingNext');
-    // Center each sibling in the available side space
-    const offset = Math.max(10, (sideSpace - siblingW * 0.65) / 2);
-    prevEl.style.left = offset + 'px';
-    prevEl.style.right = '';
-    nextEl.style.right = offset + 'px';
-    nextEl.style.left = '';
+function _renderTeamPreview() {
+    const m = teamData[activeTeamIdx];
+    if (!m) return;
+    const img = document.getElementById('teamPreviewImg');
+    if (img) { img.src = m.img; img.alt = m.name; }
+    const name = document.getElementById('teamPreviewName');
+    if (name) name.textContent = m.name;
+    const role = document.getElementById('teamPreviewRole');
+    if (role) role.textContent = m.role;
+    const desc = document.getElementById('teamPreviewDesc');
+    if (desc) desc.textContent = m.desc;
 }
 
-function openModal(idx) {
-    activeCardIdx = idx;
-    const m = teamData[idx];
-    const modal = document.getElementById('teamModal');
-
-    // Set content
-    document.getElementById('modalImg').src = m.img;
-    document.getElementById('modalImg').alt = m.name;
-    document.getElementById('modalName').textContent = m.name;
-    document.getElementById('modalRole').textContent = m.role;
-    document.getElementById('modalDesc').textContent = m.desc;
-    updateSiblings(idx);
-
-    // Activate (CSS handles the animation)
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+function _getTeamCard(idx) {
+    return document.querySelector(`#teamGrid .team-card[data-team-idx="${idx}"]`);
+}
+function _getTeamThumb(idx) {
+    return document.querySelector(`#teamThumbs .team-thumb[data-team-idx="${idx}"]`);
 }
 
-function closeModal(e) {
-    if (e && e.target && !e.target.classList.contains('modal-backdrop') && e.type !== 'keydown') return;
-    if (e && e.target && e.target.closest && e.target.closest('.modal-sibling')) return;
-    const modal = document.getElementById('teamModal');
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
-    activeCardIdx = null;
-}
+// Mostrar detail desde el grid (card → preview crece con VT)
+function showTeamMember(idx) {
+    if (idx < 0 || idx >= teamData.length) return;
+    const grid = document.getElementById('teamGrid');
+    const detail = document.getElementById('teamDetail');
+    if (!grid || !detail) return;
+    const card = _getTeamCard(idx);
 
-function navigateModal(dir) {
-    if (activeCardIdx === null) return;
-    const newIdx = (activeCardIdx + dir + teamData.length) % teamData.length;
-    const m = teamData[newIdx];
-    activeCardIdx = newIdx;
+    const doShow = () => {
+        activeTeamIdx = idx;
+        _renderTeamPreview();
+        _renderTeamThumbs();
+        grid.hidden = true;
+        detail.hidden = false;
+        // Focus al thumb activo para keyboard nav
+        requestAnimationFrame(() => {
+            const activeThumb = _getTeamThumb(idx);
+            if (activeThumb) activeThumb.focus({ preventScroll: true });
+        });
+    };
 
-    const modalCard = document.querySelector('#teamModal .modal-card');
-    const inner = modalCard.querySelector('.modal-img-wrap, .modal-body');
+    if (typeof document.startViewTransition !== 'function') {
+        doShow();
+        return;
+    }
 
-    // Slide content
-    const slideDir = dir > 0 ? 1 : -1;
-    const imgEl = document.getElementById('modalImg');
-    const nameEl = document.getElementById('modalName');
-    const roleEl = document.getElementById('modalRole');
-    const descEl = document.getElementById('modalDesc');
+    // Pre-transición: el card clickeado lleva el VT name (estado A).
+    if (card) card.style.viewTransitionName = _TEAM_VT_NAME;
 
-    // Fade out
-    const els = [imgEl.parentElement, nameEl, roleEl, descEl];
-    els.forEach(el => {
-        el.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
-        el.style.opacity = '0';
-        el.style.transform = `translateX(${slideDir * -20}px)`;
+    const t = document.startViewTransition(() => {
+        doShow();
+        // Post-update: el contenedor del preview (con overlay) lleva el name (estado B).
+        if (card) card.style.viewTransitionName = '';
+        const photoBox = detail.querySelector('.team-preview-photo');
+        if (photoBox) photoBox.style.viewTransitionName = _TEAM_VT_NAME;
     });
 
-    setTimeout(() => {
-        // Update content
-        imgEl.src = m.img;
-        imgEl.alt = m.name;
-        nameEl.textContent = m.name;
-        roleEl.textContent = m.role;
-        descEl.textContent = m.desc;
-        updateSiblings(newIdx);
-
-        // Set start position for fade in
-        els.forEach(el => {
-            el.style.transition = 'none';
-            el.style.transform = `translateX(${slideDir * 20}px)`;
-        });
-
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                els.forEach((el, i) => {
-                    el.style.transition = `opacity 0.25s ease ${i * 0.04}s, transform 0.25s ease ${i * 0.04}s`;
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateX(0)';
-                });
-            });
-        });
-    }, 180);
+    t.finished.finally(() => {
+        if (card) card.style.viewTransitionName = '';
+        const photoBox = detail.querySelector('.team-preview-photo');
+        if (photoBox) photoBox.style.viewTransitionName = '';
+    });
 }
 
-document.addEventListener('keydown', (e) => {
-    if (activeCardIdx === null) return;
-    if (e.key === 'Escape') closeModal(e);
-    if (e.key === 'ArrowLeft') navigateModal(-1);
-    if (e.key === 'ArrowRight') navigateModal(1);
-});
+// Volver al grid (preview → card vuelve con VT)
+function hideTeamMember() {
+    const grid = document.getElementById('teamGrid');
+    const detail = document.getElementById('teamDetail');
+    if (!grid || !detail) return;
+    const targetCard = _getTeamCard(activeTeamIdx);
+    const photoBox = detail.querySelector('.team-preview-photo');
 
-// ===== SWIPE EN EL MODAL DEL EQUIPO =====
-// - Horizontal: navega prev/next entre miembros
-// - Vertical: cierra el modal
-(function attachModalSwipe() {
-    const modal = document.getElementById('teamModal');
-    if (!modal) return;
-    let startX = 0, startY = 0, tracking = false;
-    const MIN_DX = 50;
-    const MIN_DY = 70;
+    const doHide = () => {
+        detail.hidden = true;
+        grid.hidden = false;
+        const prevIdx = activeTeamIdx;
+        activeTeamIdx = null;
+        // Focus al card original
+        requestAnimationFrame(() => {
+            const c = _getTeamCard(prevIdx);
+            if (c) c.focus({ preventScroll: true });
+        });
+    };
 
-    modal.addEventListener('touchstart', (e) => {
-        if (!modal.classList.contains('active')) return;
-        const t = e.touches[0];
-        startX = t.clientX;
-        startY = t.clientY;
-        tracking = true;
-    }, { passive: true });
+    if (typeof document.startViewTransition !== 'function') {
+        doHide();
+        return;
+    }
 
-    modal.addEventListener('touchend', (e) => {
-        if (!tracking || !modal.classList.contains('active')) return;
-        tracking = false;
-        const t = e.changedTouches[0];
-        const dx = t.clientX - startX;
-        const dy = t.clientY - startY;
-        const absDx = Math.abs(dx), absDy = Math.abs(dy);
-        // Gesto predominantemente vertical → cerrar
-        if (absDy > absDx && absDy > MIN_DY) {
-            closeModal();
+    if (photoBox) photoBox.style.viewTransitionName = _TEAM_VT_NAME;
+
+    const t = document.startViewTransition(() => {
+        doHide();
+        if (photoBox) photoBox.style.viewTransitionName = '';
+        if (targetCard) targetCard.style.viewTransitionName = _TEAM_VT_NAME;
+    });
+
+    t.finished.finally(() => {
+        if (targetCard) targetCard.style.viewTransitionName = '';
+        if (photoBox) photoBox.style.viewTransitionName = '';
+    });
+}
+
+// Cambiar entre miembros sin salir del detail view (thumb → preview con VT)
+function setActiveTeamMember(idx) {
+    if (idx === activeTeamIdx || idx < 0 || idx >= teamData.length) return;
+    const detail = document.getElementById('teamDetail');
+    if (!detail || detail.hidden) return; // solo aplica en detail view
+    const newThumb = _getTeamThumb(idx);
+    const photoBox = detail.querySelector('.team-preview-photo');
+    const thumbs = document.querySelectorAll('#teamThumbs .team-thumb');
+
+    const doUpdate = () => {
+        activeTeamIdx = idx;
+        _renderTeamPreview();
+        thumbs.forEach((el, i) => {
+            el.classList.toggle('active', i === idx);
+            el.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+            el.setAttribute('tabindex', i === idx ? '0' : '-1');
+        });
+    };
+
+    if (typeof document.startViewTransition !== 'function') {
+        doUpdate();
+        return;
+    }
+
+    // Pre: el thumb tiene el VT name (estado A).
+    if (newThumb) newThumb.style.viewTransitionName = _TEAM_VT_NAME;
+    if (photoBox) photoBox.style.viewTransitionName = '';
+
+    const t = document.startViewTransition(() => {
+        doUpdate();
+        if (newThumb) newThumb.style.viewTransitionName = '';
+        if (photoBox) photoBox.style.viewTransitionName = _TEAM_VT_NAME;
+    });
+
+    t.finished.finally(() => {
+        if (newThumb) newThumb.style.viewTransitionName = '';
+        if (photoBox) photoBox.style.viewTransitionName = '';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const thumbsContainer = document.getElementById('teamThumbs');
+    if (!thumbsContainer) return;
+    thumbsContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-team-idx]');
+        if (!btn) return;
+        setActiveTeamMember(parseInt(btn.dataset.teamIdx, 10));
+    });
+    thumbsContainer.addEventListener('keydown', (e) => {
+        const focused = document.activeElement.closest('[data-team-idx]');
+        if (!focused) return;
+        let i = parseInt(focused.dataset.teamIdx, 10);
+        let target = null;
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+            target = (i + 1) % teamData.length;
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            target = (i - 1 + teamData.length) % teamData.length;
+        } else if (e.key === 'Home') {
+            target = 0;
+        } else if (e.key === 'End') {
+            target = teamData.length - 1;
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            hideTeamMember();
+            return;
+        } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setActiveTeamMember(i);
             return;
         }
-        // Gesto predominantemente horizontal → navegar
-        if (absDx >= MIN_DX && absDx > absDy) {
-            if (dx < 0) navigateModal(1);   // swipe izquierda → siguiente
-            else navigateModal(-1);          // swipe derecha → anterior
+        if (target !== null) {
+            e.preventDefault();
+            setActiveTeamMember(target);
+            document.querySelector(`[data-team-idx="${target}"]`)?.focus();
         }
-    }, { passive: true });
+    });
 
-    modal.addEventListener('touchcancel', () => { tracking = false; }, { passive: true });
-})();
+    // ESC desde dentro del grid (focused en una card) no aplica — ESC solo en detail.
+});
 
 // ===== DYNAMIC YEAR =====
 var _y = document.getElementById('year');
@@ -356,7 +388,17 @@ function playAndExpand() {
 
 let fspSyncInterval = null;
 
-function openFullscreenPlayer() {
+function _withViewTransition(fn) {
+    // Wrapper que ejecuta fn dentro de una View Transition si la API existe;
+    // si no, fn corre normalmente (fallback Safari/Firefox actuales).
+    if (typeof document.startViewTransition === 'function') {
+        return document.startViewTransition(fn);
+    }
+    fn();
+    return null;
+}
+
+function _openFspNow() {
     const fsp = document.getElementById('fullscreenPlayer');
     if (!fsp) return;
     fsp.classList.add('active');
@@ -365,25 +407,71 @@ function openFullscreenPlayer() {
     syncFspUI();
     if (fspSyncInterval) clearInterval(fspSyncInterval);
     fspSyncInterval = setInterval(syncFspUI, 500);
-    // Deep link en la URL
     if (location.hash !== '#player') {
         history.pushState({ fsp: true }, '', '#player');
     }
 }
 
-function closeFullscreenPlayer() {
+function _closeFspNow() {
     const fsp = document.getElementById('fullscreenPlayer');
     if (!fsp) return;
     fsp.classList.remove('active');
     fsp.setAttribute('aria-hidden', 'true');
     if (fspSyncInterval) { clearInterval(fspSyncInterval); fspSyncInterval = null; }
-    if (!document.querySelector('.modal-backdrop.active')) {
-        document.body.style.overflow = '';
-    }
-    // Limpiar hash si venimos de ahí (sin agregar al history)
+    document.body.style.overflow = '';
     if (location.hash === '#player') {
         history.replaceState(null, '', location.pathname + location.search);
     }
+}
+
+// La VT del player usa como "origen" el botón .player-expand del player bar
+// inferior (chevron-up). Al abrir, ese botón "crece" hasta convertirse en el
+// fullscreen player; al cerrar, el player se "encoge" de vuelta al botón.
+function _assignFspVTNames(direction) {
+    const expander = document.querySelector('.player-expand');
+    const fsp = document.getElementById('fullscreenPlayer');
+    if (direction === 'open') {
+        if (expander) expander.style.viewTransitionName = 'fsp-hero';
+        if (fsp) fsp.style.viewTransitionName = '';
+    } else {
+        if (expander) expander.style.viewTransitionName = '';
+        if (fsp) fsp.style.viewTransitionName = 'fsp-hero';
+    }
+}
+
+function _clearFspVTNames() {
+    const expander = document.querySelector('.player-expand');
+    const fsp = document.getElementById('fullscreenPlayer');
+    if (expander) expander.style.viewTransitionName = '';
+    if (fsp) fsp.style.viewTransitionName = '';
+}
+
+function openFullscreenPlayer() {
+    const fsp = document.getElementById('fullscreenPlayer');
+    if (!fsp || fsp.classList.contains('active')) return;
+    _assignFspVTNames('open');
+    const t = _withViewTransition(() => {
+        _openFspNow();
+        // Tras el cambio de estado, el fsp hereda el nombre para que la VT
+        // interpole desde la posición del expander (estado A) al fsp (estado B).
+        if (fsp) fsp.style.viewTransitionName = 'fsp-hero';
+        const expander = document.querySelector('.player-expand');
+        if (expander) expander.style.viewTransitionName = '';
+    });
+    if (t && t.finished) t.finished.finally(_clearFspVTNames);
+}
+
+function closeFullscreenPlayer() {
+    const fsp = document.getElementById('fullscreenPlayer');
+    if (!fsp || !fsp.classList.contains('active')) return;
+    _assignFspVTNames('close');
+    const t = _withViewTransition(() => {
+        _closeFspNow();
+        const expander = document.querySelector('.player-expand');
+        if (expander) expander.style.viewTransitionName = 'fsp-hero';
+        if (fsp) fsp.style.viewTransitionName = '';
+    });
+    if (t && t.finished) t.finished.finally(_clearFspVTNames);
 }
 
 // Sync del fullscreen player con cambios de hash (navegación browser + deep link)
@@ -778,28 +866,93 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+// ===== INSTALL PWA (3 puntos de entrada: hero btn, fullscreen player, smart banner) =====
 let _deferredInstallPrompt = null;
+const _INSTALL_DISMISS_KEY = 'chronos_install_banner_dismissed';
+const _INSTALL_DISMISS_DAYS = 14;
+const _INSTALL_BANNER_DELAY_MS = 6000;
+
+function _isIOSSafari() {
+    const ua = navigator.userAgent || '';
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+    return isIOS && isSafari;
+}
+function _isStandalone() {
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+        || (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches)
+        || window.navigator.standalone === true
+        || document.referrer.startsWith('android-app://');
+}
+function _canInstall() {
+    if (_isStandalone()) return false;
+    return _deferredInstallPrompt !== null || _isIOSSafari();
+}
+function _bannerDismissed() {
+    try {
+        const ts = parseInt(localStorage.getItem(_INSTALL_DISMISS_KEY) || '0', 10);
+        if (!ts) return false;
+        return (Date.now() - ts) < _INSTALL_DISMISS_DAYS * 24 * 60 * 60 * 1000;
+    } catch (e) { return false; }
+}
+function _refreshInstallUI() {
+    const show = _canInstall();
+    document.querySelectorAll('[data-install-cta]').forEach((el) => {
+        el.hidden = !show;
+    });
+}
+function tryShowInstallBanner() {
+    if (!_canInstall() || _bannerDismissed()) return;
+    const b = document.getElementById('installBanner');
+    if (b) b.classList.add('visible');
+}
+function dismissInstallBanner() {
+    try { localStorage.setItem(_INSTALL_DISMISS_KEY, Date.now().toString()); } catch (e) {}
+    const b = document.getElementById('installBanner');
+    if (b) b.classList.remove('visible');
+}
+function installApp() {
+    if (_deferredInstallPrompt) {
+        _deferredInstallPrompt.prompt();
+        _deferredInstallPrompt.userChoice.finally(() => {
+            _deferredInstallPrompt = null;
+            _refreshInstallUI();
+            const b = document.getElementById('installBanner');
+            if (b) b.classList.remove('visible');
+        });
+    } else if (_isIOSSafari()) {
+        showIosInstallHint();
+    }
+}
+function showIosInstallHint() {
+    const el = document.getElementById('iosInstallHint');
+    if (!el) return;
+    el.classList.add('active');
+    el.setAttribute('aria-hidden', 'false');
+}
+function closeIosInstallHint(event) {
+    if (event && event.target && !event.target.matches('.ios-install-hint, .ios-install-hint-close')) return;
+    const el = document.getElementById('iosInstallHint');
+    if (!el) return;
+    el.classList.remove('active');
+    el.setAttribute('aria-hidden', 'true');
+}
+
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     _deferredInstallPrompt = e;
-    const btn = document.getElementById('installApp');
-    if (btn) btn.hidden = false;
+    _refreshInstallUI();
 });
 window.addEventListener('appinstalled', () => {
     _deferredInstallPrompt = null;
-    const btn = document.getElementById('installApp');
-    if (btn) btn.hidden = true;
+    _refreshInstallUI();
+    const b = document.getElementById('installBanner');
+    if (b) b.classList.remove('visible');
 });
-
-function installApp() {
-    if (!_deferredInstallPrompt) return;
-    _deferredInstallPrompt.prompt();
-    _deferredInstallPrompt.userChoice.finally(() => {
-        _deferredInstallPrompt = null;
-        const btn = document.getElementById('installApp');
-        if (btn) btn.hidden = true;
-    });
-}
+document.addEventListener('DOMContentLoaded', () => {
+    _refreshInstallUI();
+    setTimeout(tryShowInstallBanner, _INSTALL_BANNER_DELAY_MS);
+});
 
 // ===== SHARE (Web Share API + fallback clipboard) =====
 function _showToast(msg) {

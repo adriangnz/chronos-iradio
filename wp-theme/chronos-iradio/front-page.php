@@ -87,6 +87,10 @@ $HOME = trailingslashit( home_url( '/' ) );
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     Ver Programas
                 </a>
+                <button type="button" class="btn btn-ghost" id="heroInstallBtn" data-install-cta onclick="installApp()" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                    Instalar app
+                </button>
             </div>
         </div>
     </section>
@@ -176,108 +180,73 @@ $HOME = trailingslashit( home_url( '/' ) );
                     Equipo
                 </span>
                 <h2>Quienes Somos</h2>
-                <p>Apasionados de la musica que conocen a fondo el impacto de cada cancion en la cultura popular. Haz clic para saber mas.</p>
+                <p>Apasionados de la musica que conocen a fondo el impacto de cada cancion en la cultura popular.</p>
             </div>
 
-            <div class="team-grid">
-                <div class="team-card fade-up stagger-1" onclick="openModal(0)" onkeydown="if(event.key==='Enter')openModal(0)" role="button" tabindex="0" aria-label="Ver perfil de Km Rodriguez">
-                    <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/km-rodriguez.webp' ); ?>" alt="Km Rodriguez" width="300" height="400" loading="lazy" decoding="async">
-                    <div class="team-card-overlay"></div>
-                    <div class="team-card-label">
-                        <h3>Km Rodriguez</h3>
-                        <span>Creador & Director</span>
-                    </div>
-                    <div class="team-card-hint">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
-                    </div>
-                    <div class="team-card-border"></div>
+            <div class="team-stage fade-up" id="teamStage">
+                <!-- Estado A: grid de cards (default) -->
+                <div class="team-grid" id="teamGrid">
+                    <button type="button" class="team-card stagger-1" data-team-idx="0" onclick="showTeamMember(0)" aria-label="Ver perfil de Km Rodriguez">
+                        <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/km-rodriguez.webp' ); ?>" alt="Km Rodriguez" width="300" height="400" loading="lazy" decoding="async">
+                        <div class="team-card-overlay"></div>
+                        <div class="team-card-label">
+                            <h3>Km Rodriguez</h3>
+                            <span>Creador & Director</span>
+                        </div>
+                        <div class="team-card-border"></div>
+                    </button>
+                    <button type="button" class="team-card stagger-2" data-team-idx="1" onclick="showTeamMember(1)" aria-label="Ver perfil de Eryx Rodriguez">
+                        <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/eryx-rodriguez.webp' ); ?>" alt="Eryx Rodriguez" width="300" height="400" loading="lazy" decoding="async">
+                        <div class="team-card-overlay"></div>
+                        <div class="team-card-label">
+                            <h3>Eryx Rodriguez</h3>
+                            <span>Produccion & Locutor</span>
+                        </div>
+                        <div class="team-card-border"></div>
+                    </button>
+                    <button type="button" class="team-card stagger-3" data-team-idx="2" onclick="showTeamMember(2)" aria-label="Ver perfil de Enrique Gonzalez">
+                        <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/enrique-gonzalez.webp' ); ?>" alt="Enrique Gonzalez" width="300" height="400" loading="lazy" decoding="async">
+                        <div class="team-card-overlay"></div>
+                        <div class="team-card-label">
+                            <h3>Enrique Gonzalez</h3>
+                            <span>Voz & Imagen</span>
+                        </div>
+                        <div class="team-card-border"></div>
+                    </button>
+                    <button type="button" class="team-card stagger-4" data-team-idx="3" onclick="showTeamMember(3)" aria-label="Ver perfil de Victor Grinfelds">
+                        <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/victor-grinfelds.webp' ); ?>" alt="Victor Grinfelds" width="300" height="400" loading="lazy" decoding="async">
+                        <div class="team-card-overlay"></div>
+                        <div class="team-card-label">
+                            <h3>Victor Grinfelds</h3>
+                            <span>Ingeniero</span>
+                        </div>
+                        <div class="team-card-border"></div>
+                    </button>
                 </div>
 
-                <div class="team-card fade-up stagger-2" onclick="openModal(1)" onkeydown="if(event.key==='Enter')openModal(1)" role="button" tabindex="0" aria-label="Ver perfil de Eryx Rodriguez">
-                    <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/eryx-rodriguez.webp' ); ?>" alt="Eryx Rodriguez" width="300" height="400" loading="lazy" decoding="async">
-                    <div class="team-card-overlay"></div>
-                    <div class="team-card-label">
-                        <h3>Eryx Rodriguez</h3>
-                        <span>Produccion & Locutor</span>
+                <!-- Estado B: detail con preview + thumbs (oculto por default) -->
+                <div class="team-detail" id="teamDetail" hidden>
+                    <button type="button" class="team-back" onclick="hideTeamMember()" aria-label="Volver al listado del equipo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                        Volver
+                    </button>
+                    <article class="team-preview" id="teamPreview" role="tabpanel" aria-live="polite">
+                        <div class="team-preview-photo">
+                            <img id="teamPreviewImg" src="" alt="" width="800" height="500" decoding="async">
+                        </div>
+                        <div class="team-preview-info">
+                            <span class="team-preview-role" id="teamPreviewRole"></span>
+                            <h3 class="team-preview-name" id="teamPreviewName"></h3>
+                            <p class="team-preview-desc" id="teamPreviewDesc"></p>
+                        </div>
+                    </article>
+                    <div class="team-thumbs" id="teamThumbs" role="tablist" aria-label="Miembros del equipo">
+                        <!-- thumbs renderizados por JS desde teamData -->
                     </div>
-                    <div class="team-card-hint">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
-                    </div>
-                    <div class="team-card-border"></div>
-                </div>
-
-                <div class="team-card fade-up stagger-3" onclick="openModal(2)" onkeydown="if(event.key==='Enter')openModal(2)" role="button" tabindex="0" aria-label="Ver perfil de Enrique Gonzalez">
-                    <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/enrique-gonzalez.webp' ); ?>" alt="Enrique Gonzalez" width="300" height="400" loading="lazy" decoding="async">
-                    <div class="team-card-overlay"></div>
-                    <div class="team-card-label">
-                        <h3>Enrique Gonzalez</h3>
-                        <span>Voz & Imagen</span>
-                    </div>
-                    <div class="team-card-hint">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
-                    </div>
-                    <div class="team-card-border"></div>
-                </div>
-
-                <div class="team-card fade-up stagger-4" onclick="openModal(3)" onkeydown="if(event.key==='Enter')openModal(3)" role="button" tabindex="0" aria-label="Ver perfil de Franmary Fernandez">
-                    <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/franmary-fernandez.webp' ); ?>" alt="Franmary Fernandez" width="300" height="400" loading="lazy" decoding="async">
-                    <div class="team-card-overlay"></div>
-                    <div class="team-card-label">
-                        <h3>Franmary Fernandez</h3>
-                        <span>Locutora</span>
-                    </div>
-                    <div class="team-card-hint">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
-                    </div>
-                    <div class="team-card-border"></div>
-                </div>
-
-                <div class="team-card fade-up" onclick="openModal(4)" onkeydown="if(event.key==='Enter')openModal(4)" role="button" tabindex="0" aria-label="Ver perfil de Victor Grinfelds">
-                    <img class="team-card-img" src="<?php echo esc_url( $T . 'assets/team/victor-grinfelds.webp' ); ?>" alt="Victor Grinfelds" width="300" height="400" loading="lazy" decoding="async">
-                    <div class="team-card-overlay"></div>
-                    <div class="team-card-label">
-                        <h3>Victor Grinfelds</h3>
-                        <span>Ingeniero</span>
-                    </div>
-                    <div class="team-card-hint">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
-                    </div>
-                    <div class="team-card-border"></div>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Team Modal -->
-    <div class="modal-backdrop" id="teamModal" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-labelledby="modalName">
-        <div class="modal-sibling modal-sibling-prev" id="siblingPrev" onclick="navigateModal(-1)" role="button" tabindex="0" aria-label="Miembro anterior">
-            <img class="modal-sibling-img" id="siblingPrevImg" src="" alt="" width="240" height="140" decoding="async">
-            <div class="modal-sibling-info">
-                <h4 id="siblingPrevName"></h4>
-                <span id="siblingPrevRole"></span>
-            </div>
-        </div>
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeModal()" aria-label="Cerrar modal">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-            <div class="modal-img-wrap">
-                <img id="modalImg" src="" alt="" width="320" height="400" decoding="async">
-            </div>
-            <div class="modal-body">
-                <h2 id="modalName"></h2>
-                <div class="modal-role" id="modalRole"></div>
-                <p id="modalDesc"></p>
-            </div>
-        </div>
-        <div class="modal-sibling modal-sibling-next" id="siblingNext" onclick="navigateModal(1)" role="button" tabindex="0" aria-label="Miembro siguiente">
-            <img class="modal-sibling-img" id="siblingNextImg" src="" alt="" width="240" height="140" decoding="async">
-            <div class="modal-sibling-info">
-                <h4 id="siblingNextName"></h4>
-                <span id="siblingNextRole"></span>
-            </div>
-        </div>
-    </div>
 
     <!-- Anniversary -->
     <section class="anniversary">
@@ -411,7 +380,7 @@ $HOME = trailingslashit( home_url( '/' ) );
 
     <!-- Fullscreen Player -->
     <div class="fsp" id="fullscreenPlayer" role="dialog" aria-modal="true" aria-label="Reproductor en pantalla completa" aria-hidden="true">
-        <div class="fsp-backdrop" onclick="closeFullscreenPlayer()"></div>
+        <div class="fsp-backdrop" aria-hidden="true"></div>
         <div class="fsp-content">
             <div class="fsp-top">
                 <button type="button" class="fsp-close" onclick="closeFullscreenPlayer()" aria-label="Cerrar reproductor">
@@ -422,7 +391,7 @@ $HOME = trailingslashit( home_url( '/' ) );
                     <button type="button" class="fsp-install fsp-share" onclick="shareApp()" aria-label="Compartir Chronos iRadio">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                     </button>
-                    <button type="button" id="installApp" class="fsp-install" onclick="installApp()" aria-label="Instalar como app" hidden>
+                    <button type="button" id="installApp" class="fsp-install" data-install-cta onclick="installApp()" aria-label="Instalar como app" hidden>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
                     </button>
                 </div>
@@ -474,14 +443,41 @@ $HOME = trailingslashit( home_url( '/' ) );
         <div class="wa-choice-card" role="document">
             <button type="button" class="wa-choice-close" onclick="closeWhatsAppChoice(event)" aria-label="Cerrar">&times;</button>
             <h3 id="waChoiceTitle">¿A dónde querés ir?</h3>
-            <a class="wa-choice-btn" href="https://chat.whatsapp.com/CCTr7y6eyP7IVUtVrClcWu?mode=hq1tcla" target="_blank" rel="noopener">
+            <a class="wa-choice-btn" href="https://chat.whatsapp.com/CCTr7y6eyP7IVUtVrClcWu?mode=hq1tcla" target="_blank" rel="noopener" onclick="closeWhatsAppChoice()">
                 <svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6z"/></svg>
                 <span class="wa-choice-btn-info"><strong>Cabina virtual</strong><span>Chat en vivo durante el show</span></span>
             </a>
-            <a class="wa-choice-btn" href="https://whatsapp.com/channel/0029Vb71Xvi05MUjSz673L1W" target="_blank" rel="noopener">
+            <a class="wa-choice-btn" href="https://whatsapp.com/channel/0029Vb71Xvi05MUjSz673L1W" target="_blank" rel="noopener" onclick="closeWhatsAppChoice()">
                 <svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6z"/></svg>
                 <span class="wa-choice-btn-info"><strong>Canal de WhatsApp</strong><span>Anuncios y novedades</span></span>
             </a>
+        </div>
+    </div>
+
+    <!-- Install PWA — Smart Banner (home) -->
+    <div class="install-banner" id="installBanner" role="dialog" aria-label="Instalar Chronos iRadio como app">
+        <div class="install-banner-icon">
+            <img src="<?php echo esc_url( chronos_asset_url( 'assets/logo/chronos-192.png' ) ); ?>" alt="" width="40" height="40">
+        </div>
+        <div class="install-banner-text">
+            <strong>Lleva Chronos iRadio contigo</strong>
+            <span>Acceso rapido a nuestra radio.</span>
+        </div>
+        <button type="button" class="install-banner-btn" onclick="installApp()">Instalar</button>
+        <button type="button" class="install-banner-close" onclick="dismissInstallBanner()" aria-label="Descartar">&times;</button>
+    </div>
+
+    <!-- Install PWA — iOS hint -->
+    <div class="ios-install-hint" id="iosInstallHint" role="dialog" aria-modal="true" aria-hidden="true" onclick="closeIosInstallHint(event)">
+        <div class="ios-install-hint-card" role="document">
+            <button type="button" class="ios-install-hint-close" onclick="closeIosInstallHint()" aria-label="Cerrar">&times;</button>
+            <h3>Instalar en iPhone o iPad</h3>
+            <p>En Safari, agrega Chronos iRadio a tu pantalla de inicio en 3 pasos:</p>
+            <ol>
+                <li>Toca el icono <strong>Compartir</strong> <span class="ios-share-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span> en la barra inferior.</li>
+                <li>Elige <strong>Agregar a inicio</strong>.</li>
+                <li>Toca <strong>Agregar</strong> arriba a la derecha.</li>
+            </ol>
         </div>
     </div>
 

@@ -63,7 +63,7 @@ $HOME = trailingslashit( home_url( '/' ) );
                     <button type="button" class="fsp-install fsp-share" onclick="shareApp()" aria-label="Compartir Chronos iRadio">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                     </button>
-                    <button type="button" id="installApp" class="fsp-install" onclick="installApp()" aria-label="Instalar como app" hidden>
+                    <button type="button" id="installApp" class="fsp-install" data-install-cta onclick="installApp()" aria-label="Instalar como app" hidden>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
                     </button>
                 </div>
@@ -149,14 +149,28 @@ $HOME = trailingslashit( home_url( '/' ) );
         <div class="wa-choice-card" role="document">
             <button type="button" class="wa-choice-close" onclick="closeWhatsAppChoice(event)" aria-label="Cerrar">&times;</button>
             <h3 id="waChoiceTitle">¿A dónde querés ir?</h3>
-            <a class="wa-choice-btn" href="https://chat.whatsapp.com/CCTr7y6eyP7IVUtVrClcWu?mode=hq1tcla" target="_blank" rel="noopener">
+            <a class="wa-choice-btn" href="https://chat.whatsapp.com/CCTr7y6eyP7IVUtVrClcWu?mode=hq1tcla" target="_blank" rel="noopener" onclick="closeWhatsAppChoice()">
                 <svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6z"/></svg>
                 <span class="wa-choice-btn-info"><strong>Cabina virtual</strong><span>Chat en vivo durante el show</span></span>
             </a>
-            <a class="wa-choice-btn" href="https://whatsapp.com/channel/0029Vb71Xvi05MUjSz673L1W" target="_blank" rel="noopener">
+            <a class="wa-choice-btn" href="https://whatsapp.com/channel/0029Vb71Xvi05MUjSz673L1W" target="_blank" rel="noopener" onclick="closeWhatsAppChoice()">
                 <svg viewBox="0 0 448 512" fill="currentColor" aria-hidden="true"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6z"/></svg>
                 <span class="wa-choice-btn-info"><strong>Canal de WhatsApp</strong><span>Anuncios y novedades</span></span>
             </a>
+        </div>
+    </div>
+
+    <!-- Install PWA — iOS hint -->
+    <div class="ios-install-hint" id="iosInstallHint" role="dialog" aria-modal="true" aria-hidden="true" onclick="closeIosInstallHint(event)">
+        <div class="ios-install-hint-card" role="document">
+            <button type="button" class="ios-install-hint-close" onclick="closeIosInstallHint()" aria-label="Cerrar">&times;</button>
+            <h3>Instalar en iPhone o iPad</h3>
+            <p>En Safari, agrega Chronos iRadio a tu pantalla de inicio en 3 pasos:</p>
+            <ol>
+                <li>Toca el icono <strong>Compartir</strong> <span class="ios-share-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></span> en la barra inferior.</li>
+                <li>Elige <strong>Agregar a inicio</strong>.</li>
+                <li>Toca <strong>Agregar</strong> arriba a la derecha.</li>
+            </ol>
         </div>
     </div>
 

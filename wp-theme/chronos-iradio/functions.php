@@ -381,7 +381,6 @@ add_action( 'wp_head', function () {
                 'employee'           => array(
                     array( '@type' => 'Person', 'name' => 'Eryx Rodriguez',     'jobTitle' => 'Produccion y Locutor' ),
                     array( '@type' => 'Person', 'name' => 'Enrique Gonzalez',   'jobTitle' => 'Voz e Imagen' ),
-                    array( '@type' => 'Person', 'name' => 'Franmary Fernandez', 'jobTitle' => 'Locutora' ),
                     array( '@type' => 'Person', 'name' => 'Victor Grinfelds',   'jobTitle' => 'Ingeniero' ),
                 ),
             ),

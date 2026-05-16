@@ -3,7 +3,7 @@
     "name": "Chronos iRadio",
     "short_name": "Chronos iRadio",
     "description": "Reproductor en vivo de Chronos iRadio — los clásicos de la música de todos los tiempos.",
-    "start_url": "./player.html",
+    "start_url": "./#player",
     "scope": "./",
     "display": "standalone",
     "display_override": ["standalone", "minimal-ui"],
@@ -39,7 +39,7 @@
             "name": "Reproducir en vivo",
             "short_name": "Play",
             "description": "Abrir el reproductor en pantalla completa y reproducir",
-            "url": "./player.html",
+            "url": "./#player",
             "icons": [{ "src": "assets/logo/chronos-192.png", "sizes": "192x192", "type": "image/png" }]
         }
     ]
