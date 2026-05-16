@@ -25,16 +25,16 @@ $HOME = trailingslashit( home_url( '/' ) );
     <meta property="og:title" content="Chronos iRadio — Player">
     <meta property="og:description" content="Reproductor en vivo de Chronos iRadio. Los clásicos de la música de todos los tiempos.">
     <meta property="og:url" content="<?php echo esc_url( $HOME . 'player.html' ); ?>">
-    <meta property="og:image" content="<?php echo esc_url( $T . 'assets/og/og-banner-chronos.jpeg' ); ?>">
-    <meta property="og:image:width" content="1080">
-    <meta property="og:image:height" content="359">
+    <meta property="og:image" content="<?php echo esc_url( $T . 'assets/og/og-banner-clean.jpeg' ); ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Chronos iRadio — Reproductor en vivo">
     <meta property="og:site_name" content="Chronos iRadio">
     <meta property="og:locale" content="es_VE">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Chronos iRadio — Player">
     <meta name="twitter:description" content="Reproductor en vivo de Chronos iRadio. Los clásicos de la música de todos los tiempos.">
-    <meta name="twitter:image" content="<?php echo esc_url( $T . 'assets/og/og-banner-chronos.jpeg' ); ?>">
+    <meta name="twitter:image" content="<?php echo esc_url( $T . 'assets/og/og-banner-clean.jpeg' ); ?>">
 
     <link rel="icon" href="<?php echo esc_url( $T . 'assets/logo/chronos-32.jpg' ); ?>" sizes="32x32">
     <link rel="icon" href="<?php echo esc_url( $T . 'assets/logo/chronos-192.png' ); ?>" sizes="192x192">
