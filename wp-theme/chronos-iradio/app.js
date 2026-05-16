@@ -762,6 +762,7 @@ if ('serviceWorker' in navigator) {
 // ===== INSTALL PWA (3 puntos de entrada: hero btn, fullscreen player, smart banner) =====
 let _deferredInstallPrompt = null;
 const _INSTALL_DISMISS_KEY = 'chronos_install_banner_dismissed';
+const _PWA_INSTALLED_KEY = 'chronos_pwa_installed';
 const _INSTALL_DISMISS_DAYS = 14;
 const _INSTALL_BANNER_DELAY_MS = 6000;
 
@@ -772,10 +773,26 @@ function _isIOSSafari() {
     return isIOS && isSafari;
 }
 function _isStandalone() {
-    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-        || (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches)
-        || window.navigator.standalone === true
-        || document.referrer.startsWith('android-app://');
+    if (typeof window === 'undefined') return false;
+    // matchMedia: cubre standalone, fullscreen, minimal-ui y window-controls-overlay
+    // (Chrome desktop PWA puede usar cualquiera de los últimos según OS)
+    if (window.matchMedia) {
+        if (window.matchMedia('(display-mode: standalone)').matches) return true;
+        if (window.matchMedia('(display-mode: fullscreen)').matches) return true;
+        if (window.matchMedia('(display-mode: minimal-ui)').matches) return true;
+        if (window.matchMedia('(display-mode: window-controls-overlay)').matches) return true;
+    }
+    // iOS Safari
+    if (window.navigator.standalone === true) return true;
+    // Android Trusted Web Activity
+    if (document.referrer && document.referrer.startsWith('android-app://')) return true;
+    // Flag persistido por appinstalled (cubre el caso "instalada en este browser,
+    // estoy en tab normal sin display-mode standalone"). Se limpia si vuelve a
+    // dispararse beforeinstallprompt (señal de que la app fue desinstalada).
+    try {
+        if (localStorage.getItem(_PWA_INSTALLED_KEY) === '1') return true;
+    } catch (e) {}
+    return false;
 }
 function _canInstall() {
     if (_isStandalone()) return false;
@@ -833,11 +850,18 @@ function closeIosInstallHint(event) {
 
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
+    // Si el evento dispara, la app NO está instalada en este browser/profile.
+    // Limpiamos el flag persistido por si el usuario desinstaló previamente.
+    try { localStorage.removeItem(_PWA_INSTALLED_KEY); } catch (err) {}
+    // Si estamos dentro de la PWA (display-mode standalone) e igual dispara,
+    // ignorar — no tiene sentido mostrar "Instalar" estando ya instalado.
+    if (_isStandalone()) return;
     _deferredInstallPrompt = e;
     _refreshInstallUI();
 });
 window.addEventListener('appinstalled', () => {
     _deferredInstallPrompt = null;
+    try { localStorage.setItem(_PWA_INSTALLED_KEY, '1'); } catch (err) {}
     _refreshInstallUI();
     const b = document.getElementById('installBanner');
     if (b) b.classList.remove('visible');

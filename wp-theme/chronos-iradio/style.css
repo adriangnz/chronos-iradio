@@ -4,7 +4,7 @@ Theme URI: https://chronosiradio.online/
 Author: Chronos iRadio
 Author URI: https://chronosiradio.online/
 Description: Tema single-page para Chronos iRadio. Sirve la home, el reproductor PWA (/player.html), el service worker (/sw.js) y el manifest (/manifest.json) desde la raiz del dominio via rewrites. Los estilos viven en styles.css (no en este archivo, que solo lleva el header obligatorio de WordPress).
-Version: 1.3.2
+Version: 1.3.3
 Requires at least: 6.0
 Tested up to: 6.5
 Requires PHP: 7.4

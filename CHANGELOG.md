@@ -7,6 +7,16 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-05-16
+
+### Corregido
+
+- **Botón "Instalar app" del hero seguía visible dentro de la PWA instalada**: la detección de standalone (`_isStandalone()`) solo cubría `display-mode: standalone` y `fullscreen`. Faltaban `minimal-ui` y `window-controls-overlay` (que Chrome desktop usa según el OS). Además:
+  - `beforeinstallprompt` ahora ignora el evento si ya estamos en standalone (defensa por si Chrome dispara el evento dentro de una PWA instalada).
+  - `appinstalled` ahora persiste un flag en `localStorage` (`chronos_pwa_installed`) — esto cubre el caso "instalada en este browser pero estoy en una tab normal sin display-mode standalone".
+  - `beforeinstallprompt` limpia ese flag cuando dispara — si el usuario desinstala la PWA, el siguiente prompt restaura los CTAs.
+- Aplica al botón hero, al botón install del fullscreen player y al smart banner inferior.
+
 ## [1.3.2] - 2026-05-16
 
 ### Corregido
@@ -186,7 +196,8 @@ y el proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 - Animaciones fade-up con IntersectionObserver.
 - Patch de URLs protocol-relative para compatibilidad con `file://`.
 
-[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.3...HEAD
+[1.3.3]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/chronos-iradio/chronos-iradio/compare/v1.2.0...v1.3.0
