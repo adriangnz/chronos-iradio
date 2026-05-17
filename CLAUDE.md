@@ -32,6 +32,7 @@ sitemap.xml             — Sitemap con image extension
 humans.txt              — Créditos del equipo
 Caddyfile               — Servidor estático (puerto 8080, security headers)
 CHANGELOG.md            — Historial Keep a Changelog
+ROADMAP.md              — Fases del proyecto, backlog, decisiones pendientes
 README.md               — Documentación
 CLAUDE.md               — Este archivo
 .gitignore              — Excluye _backup-pre-relogo/ y wp-theme/*.zip

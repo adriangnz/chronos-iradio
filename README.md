@@ -38,6 +38,7 @@ sitemap.xml             — Sitemap con image extension
 humans.txt              — Créditos del equipo
 Caddyfile               — Servidor estático local
 CHANGELOG.md            — Historial de versiones
+ROADMAP.md              — Fases del proyecto y backlog
 README.md               — Este archivo
 CLAUDE.md               — Contexto persistente para Claude Code
 .gitignore              — Excluye backups locales y artifacts del tema
