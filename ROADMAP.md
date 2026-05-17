@@ -131,21 +131,30 @@ Dependencias: requiere primero el CPT `programa` (Fase 2) + integración OneSign
 
 ---
 
-### D. App nativa para Play Store (TWA — Trusted Web Activity)
+### D. App nativa para Play Store / App Store (evaluar a futuro)
 
-**Para qué sirve**:
-- **Visibilidad en Play Store**: la gente busca "radio chronos" en Play Store y encuentra una app oficial. Más legitimidad y descubrimiento orgánico
-- **Mejor experiencia de instalación**: instalan desde Play en lugar de "Agregar a inicio" del browser (que muchos usuarios no entienden)
-- **Mejor manejo de notificaciones push** en Android (las notifs de OneSignal llegan mejor en TWA que en PWA pura)
-- **Reseñas y estrellas** en Play Store visibles en búsquedas — social proof
+**Estado**: en pausa. La PWA actual ya cubre el caso "instalar en celular" con buen UX. Reevaluar si la radio quiere vidriera oficial en Play Store / App Store o si crece la audiencia iOS.
 
-**Plan técnico**:
-- **Bubblewrap CLI** (de Google) toma `manifest.json` + URL y genera el APK. La PWA dentro de un contenedor Android — sigue siendo la misma web, mantenimiento 0 después del primer upload
-- Cuenta Google Play Developer ($25 USD one-time)
-- Setup de Digital Asset Links (`/.well-known/assetlinks.json`) para que el APK "posea" el dominio chronosiradio.online — sin esto la app abre con la barra del browser visible
-- ~~iOS App Store~~: más complejo (Xcode, Apple Dev $99/año), no vale la pena para una radio chica
+**Para qué serviría**:
+- **Visibilidad en stores**: la gente busca "radio chronos" en Play Store / App Store y encuentra una app oficial. Más legitimidad y descubrimiento orgánico.
+- **Mejor experiencia de instalación**: stores en lugar de "Agregar a inicio" del browser.
+- **Mejor manejo de notificaciones push** en Android (las notifs de OneSignal llegan más confiables en app nativa que en PWA pura).
+- **Reseñas y estrellas** en stores visibles en búsquedas — social proof.
 
-**Trade-off**: la PWA actual ya cubre el caso "instalar en celular". TWA es bonus para **listarse en Play Store** como signal de profesionalidad. Hacer cuando la PWA esté madura y se quiera explotar el canal Play Store. Esfuerzo: 4-6 horas + 3-7 días de revisión de Google.
+**Alternativas técnicas** (de menos a más esfuerzo):
+
+| Opción | Plataformas | Código actual | Costo | Esfuerzo |
+|---|---|---|---|---|
+| **TWA (Bubblewrap)** | Solo Android | 100% reuso de la PWA | $25 Play one-time | 4-6h |
+| **Capacitor (Ionic)** | iOS + Android | 100% reuso de la PWA | + $99/año Apple Dev | 1-2 días |
+| **Expo / React Native** | iOS + Android | ❌ reescribir todo en RN | + EAS opcional $19/mes | semanas |
+
+**Notas**:
+- **TWA**: PWA empaquetada en APK. Requiere Digital Asset Links (`/.well-known/assetlinks.json`) para que la app "posea" el dominio sin mostrar barra de browser. Sin iOS.
+- **Capacitor**: empaqueta la misma PWA para iOS + Android con plugins nativos (OneSignal tiene plugin oficial). Sweet spot si interesa cobertura iOS.
+- **Expo**: implica reescribir la app en React Native. Solo vale si se quieren features muy nativas (background audio avanzado, animaciones nativas). Sobrekill para una radio chica.
+
+**Decisión actual**: priorizar A, B, C antes que esto. Volver a evaluar cuando la PWA esté madura o la audiencia iOS sea significativa.
 
 ---
 
@@ -156,7 +165,7 @@ Dependencias: requiere primero el CPT `programa` (Fase 2) + integración OneSign
 | 1 | **Analytics (Plausible)** | Sin data no se pueden priorizar las otras. Esfuerzo bajo, retorno inmediato |
 | 2 | **OneSignal + notificaciones** | Engagement automático, retiene oyentes en horarios de programas. Alto retorno por esfuerzo |
 | 3 | **Histórico de canciones** | SEO long-tail + retiene oyentes que buscan canciones puntuales |
-| 4 | **TWA en Play Store** | Cuando la PWA esté madura y se quiera vidriera oficial |
+| — | **App nativa (D)** | En pausa. Reevaluar a futuro si interesa Play Store / App Store |
 
 ---
 
