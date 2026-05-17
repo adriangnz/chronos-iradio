@@ -59,15 +59,15 @@ Página de ajustes propia del tema en `wp-admin → Chronos iRadio → Notificac
 - **Vista previa** del mensaje antes de programar
 - **Log de envíos**: cuántos suscriptores recibieron, CTR si OneSignal lo expone
 
-Dependencias: requiere primero el CPT `programa` (Fase 2) + integración OneSignal (Backlog → Fase 2.5).
+Dependencias: requiere primero el CPT `programa` (Fase 2) + integración OneSignal (Backlog).
 
 ---
 
-## 📋 Backlog / Futuro
+## 📋 Backlog
 
-### Notificaciones push con OneSignal
+### A. Notificaciones push con OneSignal
 
-**Por qué**: invitar oyentes a sintonizar cuando arranca su programa favorito ("Top 5 comienza en 5 minutos") sin depender de que tengan el sitio abierto. Web Push gratis hasta 10k subscribers.
+**Para qué sirve**: invitar oyentes a sintonizar cuando arranca su programa favorito ("Top 5 comienza en 5 minutos") sin depender de que tengan el sitio abierto. La gente vuelve más, sube el promedio de oyentes en vivo, y la radio puede comunicar cambios urgentes (corte de transmisión, programa especial) al instante.
 
 **Plan técnico**:
 
@@ -93,13 +93,70 @@ Dependencias: requiere primero el CPT `programa` (Fase 2) + integración OneSign
 - Plan paid (Journeys): recurrencia nativa, segmentos avanzados, mejor analytics. Evaluar cuando crezca la base
 - Service worker conflict: hay que coordinar OneSignal SW con el nuestro (cache + offline) — probablemente importScripts es la mejor estrategia
 
-### Otros candidatos (sin prioridad)
+---
 
-- **Analytics**: integrar Google Analytics 4 o Plausible para ver de dónde vienen oyentes, qué programas tienen más clicks
-- **Chat en vivo durante el show**: integrar Discord widget o chat propio en `#player` cuando esté on-air
-- **Histórico de canciones**: parser del feed de OnlineRadioBox + persistencia para mostrar "Último reproducido", "Top de la semana"
-- **Newsletter por email**: integración con Mailchimp/ConvertKit para promos y aniversarios
-- **App nativa (TWA)**: empaquetar la PWA con Bubblewrap para subirla a Google Play Store
+### B. Analytics (Plausible recomendado, GA4 alternativa)
+
+**Para qué sirve**:
+- Saber **cuántos oyentes únicos** entran al sitio por día/mes (no solo cuántos sintonizan — eso lo da OnlineRadioBox — sino cuántos visitan la web)
+- Saber **qué programa atrae más tráfico** (picos los sábados a las 8pm = Top 5 jala)
+- **De dónde vienen** los oyentes (Instagram, WhatsApp directo, Google search, link del canal) → dice dónde invertir esfuerzo de promoción
+- **Qué dispositivo** usan (mobile vs desktop) → priorizar UX en la plataforma dominante
+- **Funnel**: cuántos llegan → cuántos clickean "Escuchar en vivo" → cuántos instalan la PWA
+
+**Plausible vs GA4**:
+- **Plausible** (~$9/mes): privacy-first, no requiere cookie banner, dashboard limpio, todo lo que necesitás. Recomendado.
+- **GA4** (gratis): más completo pero invasivo, requiere cookie banner (feo, mata UX), dashboard complicado. Solo si el presupuesto es 0.
+
+**Implementación**: 1 script en `<head>` (vía `wp_head` action) + listo. Plausible tiene plugin oficial para WP. Esfuerzo: ~1 hora.
+
+---
+
+### C. Histórico de canciones
+
+**Para qué sirve**:
+- **"¿Cuál era esa canción que sonó hace rato?"** — caso muy común que la gente busca por separado. Si lo tenés en el sitio, vuelven al sitio
+- **Top de la semana / del mes** automático según frecuencia de reproducción
+- **SEO bonus**: cada canción reproducida puede generar una página indexable ("Chronos iRadio reprodujo 'Hotel California' el 15 de mayo de 2026") — captura tráfico long-tail de Google
+- **Compartir contexto**: link directo "Estoy escuchando X en Chronos iRadio"
+
+**Plan técnico**:
+- El widget de OnlineRadioBox ya expone el track actual + un endpoint con histórico (`/last_played` o similar)
+- WP-Cron job cada 2-3 min parsea el endpoint y guarda en CPT `cancion_reproducida` (o tabla custom para no inflar wp_posts)
+- Página dedicada `/canciones` con buscador + filtro por fecha/programa
+- Widget en home: "Último reproducido" + "Top 10 de la semana"
+- Considerar API rate limits de OnlineRadioBox; cachear agresivo
+
+**Esfuerzo**: 1-2 días. Lo complejo es el cron job de parseo confiable y la persistencia eficiente; la UI es estándar.
+
+---
+
+### D. App nativa para Play Store (TWA — Trusted Web Activity)
+
+**Para qué sirve**:
+- **Visibilidad en Play Store**: la gente busca "radio chronos" en Play Store y encuentra una app oficial. Más legitimidad y descubrimiento orgánico
+- **Mejor experiencia de instalación**: instalan desde Play en lugar de "Agregar a inicio" del browser (que muchos usuarios no entienden)
+- **Mejor manejo de notificaciones push** en Android (las notifs de OneSignal llegan mejor en TWA que en PWA pura)
+- **Reseñas y estrellas** en Play Store visibles en búsquedas — social proof
+
+**Plan técnico**:
+- **Bubblewrap CLI** (de Google) toma `manifest.json` + URL y genera el APK. La PWA dentro de un contenedor Android — sigue siendo la misma web, mantenimiento 0 después del primer upload
+- Cuenta Google Play Developer ($25 USD one-time)
+- Setup de Digital Asset Links (`/.well-known/assetlinks.json`) para que el APK "posea" el dominio chronosiradio.online — sin esto la app abre con la barra del browser visible
+- ~~iOS App Store~~: más complejo (Xcode, Apple Dev $99/año), no vale la pena para una radio chica
+
+**Trade-off**: la PWA actual ya cubre el caso "instalar en celular". TWA es bonus para **listarse en Play Store** como signal de profesionalidad. Hacer cuando la PWA esté madura y se quiera explotar el canal Play Store. Esfuerzo: 4-6 horas + 3-7 días de revisión de Google.
+
+---
+
+## Prioridad sugerida (después de Fase 2)
+
+| # | Item | Por qué |
+|---|---|---|
+| 1 | **Analytics (Plausible)** | Sin data no se pueden priorizar las otras. Esfuerzo bajo, retorno inmediato |
+| 2 | **OneSignal + notificaciones** | Engagement automático, retiene oyentes en horarios de programas. Alto retorno por esfuerzo |
+| 3 | **Histórico de canciones** | SEO long-tail + retiene oyentes que buscan canciones puntuales |
+| 4 | **TWA en Play Store** | Cuando la PWA esté madura y se quiera vidriera oficial |
 
 ---
 
